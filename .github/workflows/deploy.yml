@@ -70,23 +70,23 @@ jobs:
           [ -n "$SERVER" ] || missing="$missing FTP_SERVER"
           [ -n "$USERNAME" ] || missing="$missing FTP_USERNAME"
           [ -n "$PRIVATE_KEY" ] || missing="$missing SSH_PRIVATE_KEY"
-          [ -z "$missing" ] || { echo "Eksik gizli bilgi:$missing (GitHub › Settings › Secrets and variables › Actions)"; exit 1; }
+          [ -z "$missing" ] || { echo "::error::Eksik gizli bilgi:$missing (GitHub › Settings › Secrets and variables › Actions)"; exit 1; }
           case "$PRIVATE_KEY" in
             *"PRIVATE KEY-----"*) ;;
-            *) echo "SSH_PRIVATE_KEY bir SSH anahtarı gibi görünmüyor; -----BEGIN ... PRIVATE KEY----- satırıyla başlamalı."; exit 1 ;;
+            *) echo "::error::SSH_PRIVATE_KEY bir SSH anahtarı gibi görünmüyor; -----BEGIN ... PRIVATE KEY----- satırıyla başlamalı."; exit 1 ;;
           esac
           case "$TARGET_DIR" in
-            "" | "." | "/" | *..*) echo "TARGET_DIR klasörü geçersiz: '$TARGET_DIR'"; exit 1 ;;
+            "" | "." | "/" | *..*) echo "::error::TARGET_DIR klasörü geçersiz: '$TARGET_DIR'"; exit 1 ;;
           esac
           echo "::add-mask::$SERVER"
           echo "::add-mask::$USERNAME"
           { echo "SERVER=$SERVER"; echo "USERNAME=$USERNAME"; } >> "$GITHUB_ENV"
-          getent hosts "$SERVER" > /dev/null || { echo "FTP_SERVER adresi bulunamadı; değeri kontrol edin (ftp.airpackambalaj.com.tr olmalı)."; exit 1; }
+          getent hosts "$SERVER" > /dev/null || { echo "::error::FTP_SERVER adresi bulunamadı; değeri kontrol edin (ftp.airpackambalaj.com.tr olmalı)."; exit 1; }
           install -d -m 700 ~/.ssh
           printf '%s\n' "$PRIVATE_KEY" | tr -d '\r' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | sed -n '/^-----BEGIN/,/^-----END/p' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -T 15 -p "$PORT" "$SERVER" >> ~/.ssh/known_hosts 2> /dev/null || true
-          test -s ~/.ssh/known_hosts || { echo "Sunucu adresi doğru ama port $PORT yanıt vermedi (hosting yurt dışı bağlantıları engelliyor olabilir)."; exit 1; }
+          test -s ~/.ssh/known_hosts || { echo "::error::Sunucu adresi doğru ama port $PORT yanıt vermedi (hosting yurt dışı bağlantıları engelliyor olabilir)."; exit 1; }
 
       # SERVER ve USERNAME, önceki adımda temizlenmiş hâlleriyle gelir.
       - name: Upload to cPanel via SFTP
@@ -105,20 +105,20 @@ jobs:
 
           { connect; echo "cls -1a"; } > list.lftp
           lftp -f list.lftp > remote-list.txt || {
-            echo "Bağlanılamadı ya da hedef klasöre ($TARGET_DIR) girilemedi. Anahtar (airpack_yayin) cPanel › SSH Access'te Authorize edildi mi?"
+            echo "::error::Bağlanılamadı ya da hedef klasöre ($TARGET_DIR) girilemedi. Anahtar (airpack_yayin) cPanel › SSH Access'te Authorize edildi mi?"
             exit 1
           }
           echo "Hedef klasör ($TARGET_DIR) şu an $(grep -cv '^\.\{1,2\}/\?$' remote-list.txt || true) girdi içeriyor."
 
           # Güvenlik 1: hedefte hesabın ana klasörüne özgü klasörler görünüyorsa yanlış yerdeyiz; hiçbir şey yazmadan dur.
           if grep -qxE '(public_html|mail|etc|tmp|logs|\.cpanel)/?' remote-list.txt; then
-            echo "Hedef klasör ($TARGET_DIR) hesabın ana klasörü gibi görünüyor; yükleme durduruldu."
+            echo "::error::Hedef klasör ($TARGET_DIR) hesabın ana klasörü gibi görünüyor; yükleme durduruldu."
             exit 1
           fi
 
           # Güvenlik 2: WordPress hâlâ duruyorsa açık onay olmadan hiçbir şey silme; yapılacakları listele ve dur.
           if grep -qx 'wp-config.php' remote-list.txt && [ "$REPLACE_WORDPRESS" != "true" ]; then
-            echo "Hedef klasörde WordPress var (wp-config.php). Hiçbir şey yüklenmedi ve silinmedi."
+            echo "::error::Hedef klasörde WordPress var (wp-config.php). Hiçbir şey yüklenmedi ve silinmedi."
             echo "Klasördeki girdiler:"
             sed 's/^/  /' remote-list.txt
             echo "Onay verilirse yapılacak işlemler (deneme, gerçekte uygulanmadı):"
@@ -135,7 +135,7 @@ jobs:
           # Güvenlik 3: ne WordPress ne bu site varsa (ve klasör boş değilse) klasör yanlış olabilir; dur.
           if ! grep -qx 'wp-config.php' remote-list.txt && ! grep -qxE '_astro/?' remote-list.txt \
              && grep -qvxE '\.{1,2}/?|\.well-known/?|cgi-bin/?|error_log|php\.ini|\.htaccess|\.ftpquota|google[^/]*\.html' remote-list.txt; then
-            echo "Hedef klasörde ($TARGET_DIR) ne WordPress ne de bu site var; yanlış klasör olabilir. Yükleme durduruldu."
+            echo "::error::Hedef klasörde ($TARGET_DIR) ne WordPress ne de bu site var; yanlış klasör olabilir. Yükleme durduruldu."
             exit 1
           fi
 
