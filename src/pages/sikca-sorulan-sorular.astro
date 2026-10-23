@@ -1,0 +1,69 @@
+---
+import FAQ from '../components/FAQ.astro';
+import PageHero from '../components/PageHero.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { allFaq, faq, faqPageLd, orderFaq } from '../data/faq';
+import { whatsappLink } from '../data/site';
+import { breadcrumbLd } from '../lib/seo';
+
+const jsonLd = [
+  breadcrumbLd([{ name: 'Ana Sayfa', path: '/' }, { name: 'Sıkça Sorulan Sorular', path: '/sikca-sorulan-sorular/' }], Astro.site),
+  faqPageLd(allFaq),
+];
+---
+
+<BaseLayout
+  title="Sıkça Sorulan Sorular"
+  description="Airpack poşet ve hava kanallı rulo hakkında sık sorulanlar: minimum sipariş, iskonto, kargo ücreti, ödeme, ebat seçimi, iade ve özel üretim."
+  jsonLd={jsonLd}
+>
+  <PageHero
+    badge="Yardım"
+    title="Sıkça Sorulan Sorular"
+    lead="Ürünler, sipariş, ödeme ve kargo hakkında merak ettikleriniz."
+  />
+
+  <div class="container sss">
+    <section>
+      <h2>Ürün ve kullanım</h2>
+      <FAQ items={faq} />
+    </section>
+    <section>
+      <h2>Sipariş, ödeme ve kargo</h2>
+      <FAQ items={orderFaq} />
+    </section>
+
+    <p class="more">
+      Aradığınız cevabı bulamadınız mı? <a href={whatsappLink('Merhaba, bir sorum var.')} target="_blank" rel="noopener">WhatsApp’tan bize yazın</a>. Ebatlar için <a href="/airpack-olcu-rehberi/">Airpack Ölçü Rehberi</a>’ne, kullanım ve paketleme önerileri için <a href="/hava-kanalli-ambalaj/">ambalaj rehberimize</a> bakabilirsiniz.
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .sss {
+    max-width: 880px;
+    padding-top: 3rem;
+    padding-bottom: 6rem;
+  }
+
+  section + section {
+    margin-top: 3rem;
+  }
+
+  h2 {
+    font-size: 1.35rem;
+    margin-bottom: 1.25rem;
+    text-align: center;
+  }
+
+  .more {
+    margin-top: 3rem;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  .more a {
+    color: var(--primary);
+    font-weight: 600;
+  }
+</style>

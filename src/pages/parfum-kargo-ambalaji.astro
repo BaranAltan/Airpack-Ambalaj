@@ -1,0 +1,38 @@
+---
+import ArticlePage from '../components/ArticlePage.astro';
+import { GUIDES } from '../data/guides';
+
+const guide = GUIDES.find((g) => g.path === '/parfum-kargo-ambalaji/')!;
+---
+
+<ArticlePage guide={guide}>
+  <p class="answer"><strong>Kısa cevap:</strong> Parfüm ve kozmetik şişelerini kargoda korumak için ürünü kutusuyla ya da kutusuz olarak ebadına uygun bir airpack poşete yerleştirip şişirin. Hava kanalları küçük ve değerli cam şişeleri darbelere karşı korurken şeffaf yapısıyla ürünün düzenli görünmesini sağlar.</p>
+
+  <h2>Kozmetik ürünlerde nelere dikkat edilmeli?</h2>
+  <ul>
+    <li><strong>Cam şişeler:</strong> Parfüm ve serum şişeleri küçük ama kalın camlıdır; darbede kapak ve omuz kısmı zarar görebilir.</li>
+    <li><strong>Pompa ve sprey başlıklar:</strong> Başlıklar darbede kırılabilir ya da basınçla ürün sızabilir.</li>
+    <li><strong>Ürün kutusu:</strong> Kozmetikte kutu da ürünün parçasıdır; ezik kutu müşteri memnuniyetini düşürür.</li>
+  </ul>
+
+  <h2>Kutulu ve kutusuz gönderim</h2>
+  <p>Ürün kendi kutusundaysa kutuyu bir bütün olarak uygun ebatta bir airpack poşete yerleştirin; böylece hem şişe hem kutu korunur. Kutusuz şişelerde şişeyi doğrudan poşete koyun ve kapağın, sprey başlığın sabit olduğundan emin olun. Sprey başlıkların kapağını bantla sabitlemek yanlışlıkla basılmayı önler.</p>
+
+  <h2>Adım adım paketleme</h2>
+  <ol>
+    <li>Kapağı ve sprey başlığı kontrol edin; gerekiyorsa bantla sabitleyin.</li>
+    <li>Ürünün (ya da kutusunun) en, boy ve kalınlığını ölçün; bir miktar büyük ebat seçin.</li>
+    <li>Ürünü sönük poşete yerleştirip ortalayın ve şişirin.</li>
+    <li>Koliye yerleştirin; birden fazla ürün varsa her birini ayrı poşete koyun.</li>
+    <li>Kalan boşlukları hava kanallı ruloyla doldurun.</li>
+  </ol>
+
+  <h2>Küçük ürünler ve setler</h2>
+  <p>Deneme boyu şişeler, rujlar ya da küçük kremler için küçük ebatlı poşetler yeterlidir. Set halinde gönderilen ürünlerde her ürünü ayrı poşete koymak, ürünlerin birbirine sürtünmesini ve çizilmesini önler. Ebatları <a href="/airpack-olcu-rehberi/">ölçü rehberinde</a> karşılaştırabilirsiniz.</p>
+
+  <h2>Sunum ve kutu açılış deneyimi</h2>
+  <p>Şeffaf hava kanalları ürünü gizlemeden korur; müşteri paketi açtığında ürünü düzenli ve özenle paketlenmiş halde görür. Paketlerinizde markanızın görünmesini istiyorsanız <a href="/ozel-uretim-logolu-airpack/">logolu airpack</a> seçeneğine göz atın.</p>
+
+  <h2>Hangi ürünü seçmeliyim?</h2>
+  <p>Küçük ve orta boy kozmetik ürünler için <a href="/kategori/hazir-paketler/">hazır airpack poşetler</a> pratik bir çözümdür. Farklı boyutlarda çok sayıda ürün gönderiyorsanız <a href="/kategori/rulo-paketler/">hava kanallı rulo</a> ile her ürüne uygun uzunlukta koruma hazırlayabilirsiniz.</p>
+</ArticlePage>

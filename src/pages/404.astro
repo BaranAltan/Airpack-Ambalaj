@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Sayfa Bulunamadı" description="Aradığınız sayfa bulunamadı." noindex>
+  <section class="nf">
+    <div class="container">
+      <span class="code" aria-hidden="true">404</span>
+      <h1>Aradığınız sayfa bulunamadı</h1>
+      <p>Sayfa taşınmış ya da kaldırılmış olabilir. Ürün kataloğumuza göz atabilir veya bize ulaşabilirsiniz.</p>
+      <div class="btns">
+        <a href="/magaza/" class="btn btn-primary">Ürünleri İncele</a>
+        <a href="/" class="btn btn-outline">Ana Sayfa</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf {
+    padding: 6rem 0;
+    text-align: center;
+  }
+
+  .code {
+    display: block;
+    font-size: clamp(5rem, 16vw, 8rem);
+    font-weight: 800;
+    line-height: 1;
+    color: var(--primary);
+    margin-bottom: 1rem;
+  }
+
+  .btns {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+</style>

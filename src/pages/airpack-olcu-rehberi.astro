@@ -1,0 +1,207 @@
+---
+import { Image } from 'astro:assets';
+import olcuImg from '../assets/site/airpack-olculeri.jpg';
+import PageHero from '../components/PageHero.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { bags, productUrl } from '../data/products';
+import { whatsappLink } from '../data/site';
+import { BULK_MIN_QTY, formatTRY, unitPrice } from '../lib/pricing';
+import { ogPath } from '../lib/og';
+import { breadcrumbLd } from '../lib/seo';
+
+const heights = [...new Set(bags.map((p) => p.height))].sort((a, b) => a - b);
+const groups = heights.map((h) => ({ height: h, items: bags.filter((p) => p.height === h) }));
+const widths = [...new Set(bags.map((p) => p.width))].sort((a, b) => a - b);
+---
+
+<BaseLayout
+  title="Airpack Ölçü Rehberi"
+  description={`Airpack poşet ölçüleri ve fiyat listesi: ${widths[0]}–${widths.at(-1)} cm en, ${heights[0]}–${heights.at(-1)} cm boy arası ${bags.length} ebat. Ürününüze uygun hava kanallı ambalaj ölçüsünü seçin.`}
+  og={ogPath('olcu-rehberi')}
+  imageAlt="Airpack Ölçü Rehberi ve fiyat listesi"
+  jsonLd={[breadcrumbLd([{ name: 'Ana Sayfa', path: '/' }, { name: 'Airpack Ölçü Rehberi', path: '/airpack-olcu-rehberi/' }], Astro.site)]}
+>
+  <PageHero
+    badge="Doğru Paketleme & Ebat Seçimi"
+    title="Airpack Ölçü Rehberi"
+    lead="Ürünlerinize en uygun airpack ambalajını bulmak için tablomuzu inceleyin veya destek alın."
+  />
+
+  <div class="container guide">
+    <div class="glass-panel panel intro">
+      <Image src={olcuImg} alt="Airpack poşetin şerit metreyle ölçülmesi" widths={[300, 600]} sizes="(min-width: 768px) 260px, 100vw" class="intro-img" />
+      <div>
+        <h2>Nasıl Ölçü Alınır?</h2>
+        <p>
+          Airpack ürünleri şiştiğinde iç hacimleri bir miktar daralır. Bu nedenle ürününüzün tam dış ölçülerini aldıktan sonra
+          tablodaki uygun ebatları seçmeniz önemlidir.
+        </p>
+        <p>Ölçüler poşetin <strong>en × boy</strong> değerleridir (cm). Tüm poşetler 90 mikron kalınlığındadır ve 50’li paketler halinde gönderilir.</p>
+      </div>
+    </div>
+
+    <div class="glass-panel panel">
+      <h2>Tüm Airpack Ölçüleri ve Fiyatları</h2>
+      <p class="scroll-hint">Tabloyu sağa kaydırarak tüm sütunları görebilirsiniz.</p>
+      <div class="table-wrap">
+        <table>
+          <caption class="sr-only">Airpack poşet ölçüleri ve adet fiyatları</caption>
+          <thead>
+            <tr>
+              <th scope="col">Poşet Ölçüsü</th>
+              <th scope="col">En</th>
+              <th scope="col">Boy</th>
+              <th scope="col">Adet Fiyatı</th>
+              <th scope="col">1.000+ Adet</th>
+            </tr>
+          </thead>
+          {
+            groups.map((g) => (
+              <tbody>
+                <tr class="group">
+                  <th colspan="5" scope="rowgroup">
+                    {g.height} cm boy
+                  </th>
+                </tr>
+                {g.items.map((p) => (
+                  <tr>
+                    <th scope="row">
+                      <a href={productUrl(p)}>
+                        {p.width}×{p.height} cm
+                      </a>
+                    </th>
+                    <td>{p.width} cm</td>
+                    <td>{p.height} cm</td>
+                    <td>{formatTRY(p.price)}</td>
+                    <td class="bulk">{formatTRY(unitPrice(p.price, BULK_MIN_QTY))}</td>
+                  </tr>
+                ))}
+              </tbody>
+            ))
+          }
+        </table>
+      </div>
+
+      <div class="help">
+        <p>Emin değil misiniz?</p>
+        <a href={whatsappLink('Merhaba, ürünüm için doğru airpack ölçüsünü öğrenmek istiyorum.')} class="btn btn-primary" target="_blank" rel="noopener">Bize Danışın</a>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .guide {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 900px;
+    padding-top: 4rem;
+    padding-bottom: 6rem;
+  }
+
+  .panel {
+    padding: 2.5rem;
+    border-radius: 24px;
+    background: #fff;
+  }
+
+  .intro {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .intro :global(.intro-img) {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 16px;
+  }
+
+  .intro strong {
+    color: var(--text-main);
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    margin-top: 0.5rem;
+  }
+
+  .scroll-hint {
+    display: none;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 600px) {
+    .scroll-hint {
+      display: block;
+    }
+  }
+
+  table {
+    width: 100%;
+    min-width: 520px;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.92rem;
+  }
+
+  thead th {
+    padding: 0.85rem 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+  }
+
+  td,
+  tbody th {
+    padding: 0.7rem 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 400;
+  }
+
+  tbody th a {
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  tbody th a:hover {
+    text-decoration: underline;
+  }
+
+  .group th {
+    padding-top: 1.25rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: var(--bg-color);
+  }
+
+  .bulk {
+    color: var(--success-dark);
+    font-weight: 600;
+  }
+
+  .help {
+    text-align: center;
+    margin-top: 2.5rem;
+  }
+
+  .help p {
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  @media (max-width: 640px) {
+    .panel {
+      padding: 1.5rem;
+    }
+
+    .intro {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

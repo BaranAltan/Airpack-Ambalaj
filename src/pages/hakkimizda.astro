@@ -1,0 +1,283 @@
+---
+import { Image } from 'astro:assets';
+import factory from '../assets/site/toptan-airpack.webp';
+import Icon from '../components/Icon.astro';
+import PageHero from '../components/PageHero.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { breadcrumbLd } from '../lib/seo';
+
+const features = [
+  {
+    icon: 'shield-check',
+    title: 'Maksimum Koruma',
+    text: 'Bağımsız hava kanalları sayesinde şiddetli darbelere karşı mükemmel şok emilimi sağlar. Bir kanal patlasa bile diğerleri şişenizi korumaya devam eder.',
+  },
+  {
+    icon: 'trending-down',
+    title: 'Maliyetleri Düşürür',
+    text: 'Kırık ürün iadelerini ve telafi kargo masraflarını sıfıra indirir. Müşteri memnuniyetini artırarak markanıza değer katar.',
+  },
+  {
+    icon: 'package',
+    title: 'Depolama Avantajı',
+    text: 'Şişirilmeden önce tamamen düzdür. Geleneksel koruyuculara göre depoda %90 oranında yer tasarrufu sağlar.',
+  },
+] as const;
+---
+
+<BaseLayout
+  title="Hakkımızda"
+  description="Airpack Ambalaj, kırılabilir ürünlerin kargo güvenliği için hava kanallı poşet ve rulo üretir: bağımsız hava kanalları, özel kalıp ve logolu üretim."
+  image={factory}
+  imageAlt="Airpack Ambalaj üretim tesisi"
+  jsonLd={[breadcrumbLd([{ name: 'Ana Sayfa', path: '/' }, { name: 'Hakkımızda', path: '/hakkimizda/' }], Astro.site)]}
+>
+  <PageHero
+    badge="Biz Sadece Tedarikçi Değil, Doğrudan Üreticiyiz"
+    title="Hakkımızda"
+    lead="Türkiye'nin dört bir yanındaki markaların ürünlerini güvenle geleceğe taşıyoruz. Hava kanallı paketleme sistemlerinde (Airpack) öncü tesislerimizle, işletmenize özel kalıplar üretiyoruz."
+  />
+
+  <section class="story-section">
+    <div class="container story">
+      <Image
+        src={factory}
+        alt="Airpack Ambalaj üretim tesisi"
+        widths={[420, 640, 840]}
+        sizes="(min-width: 1024px) 420px, 100vw"
+        class="story-img"
+      />
+
+      <div>
+        <h2>Hikayemiz ve <span>Misyonumuz</span></h2>
+        <div class="text">
+          <p>
+            E-ticaretin ve kargo lojistiğinin patlama yaşadığı son yıllarda, işletmelerin en büyük maliyet kalemlerinden
+            birinin <strong>“kırılan ve hasar gören ürünler”</strong> olduğunu fark ettik. Geleneksel balonlu naylonlar veya
+            strafor köpükler hem depoları işgal ediyor hem de yeterli korumayı sağlamıyordu.
+          </p>
+          <p>
+            İşte bu noktada Airpack Ambalaj olarak devreye girdik. Geliştirdiğimiz ters valf teknolojisi sayesinde, sadece
+            ihtiyacınız olduğu an şişirebileceğiniz, %90’a varan depo tasarrufu sağlayan hava yastığı sistemlerini Türkiye’de
+            üretmeye başladık.
+          </p>
+          <p>
+            Amacımız basit: <strong>Siz sadece ürününüzün kalitesine odaklanın, sağlam ulaşmasını bize bırakın.</strong> İster
+            butik bir gıda üreticisi olun, ister binlerce teknolojik alet gönderen bir distribütör; ürününüze milimi milimine
+            oturan, markanıza özel ambalajlar tasarlıyoruz.
+          </p>
+        </div>
+
+        <div class="values">
+          <div>
+            <span class="v-icon blue"><Icon name="target" /></span>
+            <h3>Vizyonumuz</h3>
+            <p>Avrupa ve Ortadoğu pazarında yeni nesil koruyucu ambalaj standartlarını belirleyen lider üretici olmak.</p>
+          </div>
+          <div>
+            <span class="v-icon green"><Icon name="globe" /></span>
+            <h3>Sürdürülebilirlik</h3>
+            <p>
+              Eski nesil petro-kimya türevleri (strafor) yerine, %100 geri dönüştürülebilir ve karbon ayak izini azaltan
+              yapılar üretmek.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="why lazy-section">
+    <div class="container">
+      <div class="section-title">
+        <h2>Neden Bizi Seçmelisiniz?</h2>
+        <p>Sadece bir malzeme satmıyoruz, üretim hattınızdan müşterinizin kapısına kadar bir değer zinciri inşa ediyoruz.</p>
+      </div>
+      <div class="grid-cols-3 cards">
+        {
+          features.map((f) => (
+            <div class="card">
+              <span class="f-icon">
+                <Icon name={f.icon} />
+              </span>
+              <h3>{f.title}</h3>
+              <p>{f.text}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="closing lazy-section">
+    <div class="container">
+      <h2>Birlikte Çalışmaya Hazır Mısınız?</h2>
+      <p>Numune talebi veya fabrikanız için özel fizibilite raporu oluşturmamız için hemen iletişime geçin.</p>
+      <div class="btns">
+        <a href="/bize-ulasin/" class="btn btn-primary">İletişim Formu</a>
+        <a href="/magaza/" class="btn btn-outline">Ürünleri İncele</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .story-section {
+    padding: 100px 0;
+  }
+
+  .story {
+    display: grid;
+    grid-template-columns: 420px minmax(0, 1fr);
+    gap: 74px;
+    align-items: center;
+  }
+
+  .story :global(.story-img) {
+    width: 100%;
+    aspect-ratio: 420 / 694;
+    object-fit: cover;
+    border-radius: 24px;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .story > div {
+    max-width: 520px;
+  }
+
+  h2 span {
+    color: var(--primary);
+  }
+
+  .story h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .text p {
+    line-height: 1.8;
+  }
+
+  .text strong {
+    color: var(--text-main);
+  }
+
+  .values {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .v-icon {
+    display: inline-flex;
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .v-icon.blue {
+    color: var(--primary);
+  }
+
+  .v-icon.green {
+    color: var(--success);
+  }
+
+  .values h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .values p {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  .why {
+    padding: 100px 0;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border-color);
+  }
+
+  .cards {
+    gap: 20px;
+  }
+
+  .card {
+    padding: 24px;
+    background: var(--bg-color);
+    border: 1px solid #f3f4f6;
+    border-radius: 16px;
+  }
+
+  .f-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: #cae1ff;
+    color: var(--primary);
+    font-size: 36px;
+    margin-bottom: 28px;
+  }
+
+  .card h3 {
+    font-size: 1.25rem;
+    line-height: 1;
+    margin-bottom: 20px;
+  }
+
+  .card p {
+    line-height: 1.8;
+    margin: 0;
+  }
+
+  .closing {
+    padding: 100px 0;
+    background: var(--bg-color);
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+  }
+
+  .closing h2 {
+    font-size: 2rem;
+  }
+
+  .btns {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+
+  @media (max-width: 900px) {
+    .story-section,
+    .why,
+    .closing {
+      padding: 64px 0;
+    }
+
+    .story {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .story :global(.story-img) {
+      max-width: 420px;
+      aspect-ratio: 4 / 5;
+      margin: 0 auto;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .values {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

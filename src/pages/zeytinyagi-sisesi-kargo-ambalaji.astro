@@ -1,0 +1,32 @@
+---
+import ArticlePage from '../components/ArticlePage.astro';
+import { GUIDES } from '../data/guides';
+
+const guide = GUIDES.find((g) => g.path === '/zeytinyagi-sisesi-kargo-ambalaji/')!;
+---
+
+<ArticlePage guide={guide}>
+  <p class="answer"><strong>Kısa cevap:</strong> Zeytinyağı şişelerini kargoda güvenle göndermek için kapağı sızdırmazlık için sabitleyin, her şişeyi ebadına uygun bir airpack poşete yerleştirip şişirin ve şişeleri koli içinde dik, hareket etmeyecek şekilde yerleştirin. Hava kanalları hem kırılmayı önler hem de şişeler arasındaki teması keser.</p>
+
+  <h2>Zeytinyağı gönderiminde iki risk: kırılma ve sızıntı</h2>
+  <p>Cam şişeler darbeyle kırılabilir; teneke ve plastik ambalajlarda ise ezilme ve kapak gevşemesi sızıntıya yol açabilir. Sızan yağ yalnızca o ürünü değil, aynı kolideki diğer ürünleri ve kargodaki başka gönderileri de etkiler. Bu yüzden zeytinyağı paketlerken darbe koruması ve sızıntı önlemi birlikte düşünülmelidir.</p>
+
+  <h2>Adım adım paketleme</h2>
+  <ol>
+    <li><strong>Kapağı sabitleyin:</strong> Kapağı sıkın, emniyet halkasını kontrol edin ve kapak çevresini streç filmle sarın.</li>
+    <li><strong>Ebadı seçin:</strong> Şişenin boyunu ve çapını ölçün; şişeden bir miktar büyük poşet seçin.</li>
+    <li><strong>Poşete yerleştirip şişirin:</strong> Şişe poşetin ortasında, boyun kısmı hava kanallarıyla çevrili olacak şekilde durmalıdır.</li>
+    <li><strong>Dik yerleştirin:</strong> Şişeleri koli içinde dik konumda yerleştirin; böylece kapağa gelen basınç azalır.</li>
+    <li><strong>Boşlukları doldurun:</strong> Koli içindeki boşlukları hava kanallı ruloyla doldurun.</li>
+    <li><strong>İşaretleyin:</strong> “Kırılacak eşya” ve “Bu taraf yukarı” işaretlerini ekleyin.</li>
+  </ol>
+
+  <h2>Cam şişe, teneke ve büyük ambalajlar</h2>
+  <p>Cam şişelerde en büyük risk kırılmadır; her şişe ayrı bir poşette olmalıdır. Teneke kutularda ezilme ve köşe darbeleri öne çıkar; köşelerin hava kanallarıyla çevrilmesi ezilmeyi azaltır. Büyük hacimli ambalajlar ağır olduğu için koli seçimi ve koli içinde sabitleme daha da önemlidir; uygun hazır ebat bulamazsanız ürünü hava kanallı ruloyla sarabilirsiniz.</p>
+
+  <h2>Çoklu şişe ve hediye setleri</h2>
+  <p>Birden fazla şişeyi aynı kolide gönderirken her şişeyi ayrı bir poşete koyun; şişelerin birbirine değmemesi kırılma riskini belirgin şekilde azaltır. Hediye kutularında ürün kutusunu koruyorsanız şişeyi kutusuyla birlikte uygun ebatta bir poşete yerleştirebilirsiniz.</p>
+
+  <h2>Hangi ürünü seçmeliyim?</h2>
+  <p>Standart şişe boylarında düzenli gönderim yapıyorsanız <a href="/kategori/hazir-paketler/">hazır airpack poşetler</a>, farklı boylarda ve büyük ambalajlarda <a href="/kategori/rulo-paketler/">hava kanallı rulo</a> uygundur. Şişe ölçünüze göre ebatları <a href="/airpack-olcu-rehberi/">ölçü rehberinde</a> karşılaştırabilirsiniz. Genel kurallar için <a href="/sise-kargo-ambalaji/">şişe kargo ambalajı</a> rehberine de göz atın.</p>
+</ArticlePage>

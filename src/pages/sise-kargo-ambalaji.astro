@@ -1,0 +1,37 @@
+---
+import ArticlePage from '../components/ArticlePage.astro';
+import { GUIDES } from '../data/guides';
+
+const guide = GUIDES.find((g) => g.path === '/sise-kargo-ambalaji/')!;
+---
+
+<ArticlePage guide={guide}>
+  <p class="answer"><strong>Kısa cevap:</strong> Cam şişeyi kargoda kırılmadan göndermek için şişeyi ebadına uygun bir hava kanallı (airpack) poşete yerleştirip şişirin, kapağın sızdırmadığından emin olun ve şişeyi koli içinde hareket etmeyecek şekilde yerleştirin. Hava sütunları şişeyi her yönden sararak darbeleri emer.</p>
+
+  <h2>Cam şişeler kargoda neden kırılır?</h2>
+  <p>Kargo sırasında paketler taşıma bantlarında, araç içinde ve indirme-bindirme sırasında defalarca darbe alır. Cam şişelerde kırılma çoğunlukla üç nedenle olur: koli içinde hareket eden şişenin koli duvarına çarpması, şişelerin birbirine değmesi ve en zayıf noktalar olan boyun ile dip kısmına gelen doğrudan darbe.</p>
+
+  <h2>Adım adım şişe paketleme</h2>
+  <ol>
+    <li><strong>Kapağı kontrol edin:</strong> Kapağı sıkıca kapatın. Sıvı ürünlerde kapağın çevresini streç film ya da bantla sabitleyerek olası sızıntıyı sınırlayın.</li>
+    <li><strong>Doğru ebadı seçin:</strong> Şişenin boyunu ve çapını ölçün. Şişirildiğinde iç hacim daraldığı için şişeden bir miktar büyük poşet seçin.</li>
+    <li><strong>Şişeyi poşete yerleştirin:</strong> Şişe poşetin içinde ortalanmalı; boyun kısmı da hava kanallarıyla çevrili olmalıdır.</li>
+    <li><strong>Şişirin:</strong> Valf girişinden pompa ya da kompresörle, kanallar dolgun ama hafif esnek olana kadar şişirin.</li>
+    <li><strong>Koliye yerleştirin:</strong> Şişeyi dik konumda ve koli içinde oynamayacak şekilde yerleştirin; kalan boşlukları hava kanallı ruloyla doldurun.</li>
+    <li><strong>Koliyi kapatın ve işaretleyin:</strong> Koliyi bantlayın, “Kırılacak eşya” ve “Bu taraf yukarı” işaretlerini ekleyin.</li>
+  </ol>
+
+  <h2>Birden fazla şişe gönderirken</h2>
+  <p>Her şişeyi ayrı bir airpack poşete yerleştirin; böylece şişeler birbirine temas etmez. Çok sayıda şişeyi tek kolide gönderiyorsanız koliyi şişelerin toplam hacmine göre seçin ve şişeler arasında ya da koli kenarlarında boşluk bırakmayın.</p>
+
+  <h2>Sık yapılan hatalar</h2>
+  <ul>
+    <li>Şişeye tam oturan, şişirildiğinde onu sıkıştıran küçük bir ebat seçmek.</li>
+    <li>Poşeti fazla sert şişirmek: kanallar çok gergin olursa darbeyi emme payı azalır.</li>
+    <li>Koli içinde boşluk bırakmak: şişe hareket ettikçe her darbe büyür.</li>
+    <li>Sıvı ürünlerde kapak sızdırmazlığını kontrol etmemek.</li>
+  </ul>
+
+  <h2>Hangi ürünü seçmeliyim?</h2>
+  <p>Aynı boyutta şişeleri düzenli gönderiyorsanız <a href="/kategori/hazir-paketler/">hazır airpack poşetler</a> en hızlı çözümdür. Farklı boyutlarda şişe gönderiyorsanız ya da koli boşluklarını doldurmak istiyorsanız <a href="/kategori/rulo-paketler/">hava kanallı rulo</a> kullanabilirsiniz. Ebatları karşılaştırmak için <a href="/airpack-olcu-rehberi/">ölçü rehberine</a> bakın.</p>
+</ArticlePage>

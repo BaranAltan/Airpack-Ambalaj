@@ -1,0 +1,42 @@
+---
+import ArticlePage from '../components/ArticlePage.astro';
+import { GUIDES } from '../data/guides';
+
+const guide = GUIDES.find((g) => g.path === '/airpack-nasil-sisirilir/')!;
+---
+
+<ArticlePage guide={guide}>
+  <p class="answer"><strong>Kısa cevap:</strong> Airpack’i şişirmek için ürünü sönük poşete yerleştirin, el pompasının ya da kompresörün ucunu poşetin valf girişine takın ve hava kanalları dolgun ama hafif esnek olana kadar şişirin. Valfler havanın geri kaçmasını önler; ucu çıkardığınızda poşet şişkin kalır.</p>
+
+  <h2>Gerekli ekipman</h2>
+  <ul>
+    <li><strong>El pompası:</strong> Günde birkaç ya da birkaç düzine paket gönderenler için yeterlidir; bir poşet saniyeler içinde şişirilir.</li>
+    <li><strong>Kompresör ya da şişirme makinesi:</strong> Yoğun paketleme yapan işletmeler için hız kazandırır. Şişirme ekipmanı hakkında bilgi almak için WhatsApp’tan bize yazabilirsiniz.</li>
+  </ul>
+
+  <h2>Adım adım şişirme</h2>
+  <ol>
+    <li><strong>Ürünü yerleştirin:</strong> Ürünü poşet sönükken içine koyun ve ortalayın. Şişirdikten sonra ürün yerleştirmek zordur.</li>
+    <li><strong>Valf girişini bulun:</strong> Poşetin kenarındaki şişirme girişini bulun.</li>
+    <li><strong>Ucu takın:</strong> Pompa ya da kompresör ucunu girişe tam oturacak şekilde takın.</li>
+    <li><strong>Şişirin:</strong> Tüm kanallar eşit şekilde dolana kadar hava verin.</li>
+    <li><strong>Kontrol edin:</strong> Kanallar dolgun olmalı, ancak parmakla bastırdığınızda hafifçe esnemelidir.</li>
+    <li><strong>Ucu çıkarın ve paketleyin:</strong> Valf havayı içeride tutar. Ürünü koliye yerleştirip boşlukları doldurun.</li>
+  </ol>
+
+  <h2>Ne kadar şişirmeli?</h2>
+  <p>Çok sert şişirilen kanallar darbeyi emecek esneklik payını kaybeder ve fazla basınçta patlayabilir. Az şişirilen kanallar ise ürünün koli tabanına ya da duvarına temas etmesine izin verir. Doğru seviye, kanalların dolgun olduğu ama elle bastırıldığında hafifçe çöktüğü noktadır.</p>
+
+  <h2>Sık yapılan hatalar</h2>
+  <ul>
+    <li>Ürünü şişirdikten sonra poşete sokmaya çalışmak.</li>
+    <li>Poşeti fazla sert şişirmek.</li>
+    <li>Valf girişine keskin uçlu aletlerle zarar vermek.</li>
+    <li>Şişirilmiş paketleri güneş altında ya da sıcak ortamda uzun süre bekletmek: ısınan hava genleşir ve kanallardaki basınç artar.</li>
+  </ul>
+
+  <h2>Rulolar nasıl kullanılır?</h2>
+  <p>Hava kanallı rulolar ihtiyaç duyulan uzunlukta kesilerek kullanılır; ürünün etrafına sarılır ya da koli içindeki boşlukları doldurur. Rulo kullanımı ve şişirme yöntemi hakkında ayrıntılı bilgi için bize WhatsApp’tan yazabilirsiniz. Rulo yükseklikleri ve metre fiyatları <a href="/kategori/rulo-paketler/">hava kanallı rulo</a> sayfasında.</p>
+
+  <p>Hava kanallı ambalajın nasıl çalıştığını ve türlerini merak ediyorsanız <a href="/hava-kanalli-ambalaj/">hava kanallı ambalaj nedir?</a> rehberine göz atın.</p>
+</ArticlePage>

@@ -1,0 +1,53 @@
+---
+import { whatsappLink } from '../data/site';
+import Icon from './Icon.astro';
+---
+
+<a
+  class="wa-fab"
+  href={whatsappLink('Merhaba, hava kanallı ambalaj ürünleriniz hakkında bilgi almak istiyorum.')}
+  target="_blank"
+  rel="noopener"
+  aria-label="WhatsApp ile yazın"
+>
+  <Icon name="whatsapp" />
+</a>
+
+<style>
+  .wa-fab {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: 900;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #25d366;
+    color: #fff;
+    font-size: 1.75rem;
+    box-shadow: 0 10px 24px -6px rgba(18, 140, 75, 0.55);
+    transition: transform 0.2s ease;
+  }
+
+  .wa-fab:hover {
+    transform: scale(1.07);
+  }
+
+  @media (max-width: 600px) {
+    .wa-fab {
+      right: 0.85rem;
+      bottom: 0.85rem;
+      width: 50px;
+      height: 50px;
+      font-size: 1.55rem;
+    }
+  }
+
+  @media print {
+    .wa-fab {
+      display: none;
+    }
+  }
+</style>

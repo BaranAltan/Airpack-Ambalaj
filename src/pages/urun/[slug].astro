@@ -1,0 +1,1007 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { Image, getImage } from 'astro:assets';
+import Icon from '../../components/Icon.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { categoryUrl, isOnSale, isRoll, productUrl, products, sizeLabel, type Product } from '../../data/products';
+import { LEGAL } from '../../data/legal';
+import { whatsappLink } from '../../data/site';
+import { BULK_MIN_QTY, MIN_QTY, QTY_STEP, SHIPPING_FEE, UNIT_LABEL, formatNumber, formatTRY, unitPrice } from '../../lib/pricing';
+import { absolute, breadcrumbLd, organizationId } from '../../lib/seo';
+import { ogPath, productOgSlug } from '../../lib/og';
+import { productThumb } from '../../lib/thumb';
+
+export const getStaticPaths = (() =>
+  products.map((product) => ({ params: { slug: product.slug }, props: { product } }))) satisfies GetStaticPaths;
+
+interface Props {
+  product: Product;
+}
+
+const { product } = Astro.props;
+const url = productUrl(product);
+const images = [product.image, ...product.gallery];
+const roll = isRoll(product);
+const unit = UNIT_LABEL[product.unit];
+const bulkPrice = unitPrice(product.price, BULK_MIN_QTY, product.unit);
+const onSale = isOnSale(product);
+const thumb = await productThumb(product);
+
+// Arama sonuçlarında WordPress'teki başlıkla aynı görünmesi için (× → x)
+const seoName = product.name.replace(/×/g, 'x').replace(/’/g, "'");
+const rollHeight = String(product.width).replace('.', ',');
+const description = roll
+  ? `${rollHeight} cm yüksekliğinde hava kanallı airpack rulo; istediğiniz uzunlukta kesilir. Metre fiyatı ${formatTRY(product.price)}, en az ${MIN_QTY} metre, ${QTY_STEP} metrenin katları halinde.`
+  : `Üretici güvencesiyle ${product.width}x${product.height} cm hava kanallı airpack poşet (şişme kargo poşeti). 90 mikron, bağımsız hava kanalları. Adet fiyatı ${formatTRY(product.price)}, 1.000+ adette ${formatTRY(bulkPrice)}.`;
+
+const large = await Promise.all(images.map((src) => getImage({ src, width: 1147, format: 'webp' })));
+const validUntil = `${new Date().getFullYear() + 1}-12-31`;
+// UN/CEFACT birim kodları: C62 = adet, MTR = metre
+const unitCode = roll ? 'MTR' : 'C62';
+const offer = (price: number, extra = {}) => ({
+  '@type': 'Offer',
+  url: absolute(url, Astro.site),
+  price: price.toFixed(2),
+  priceCurrency: 'TRY',
+  priceValidUntil: validUntil,
+  availability: 'https://schema.org/InStock',
+  itemCondition: 'https://schema.org/NewCondition',
+  seller: { '@id': organizationId(Astro.site) },
+  ...extra,
+});
+
+/** Birim fiyat: 1 adet ya da 1 metre; eligibleQuantity hangi miktarlarda geçerli olduğunu söyler. */
+const unitSpec = (price: number, minValue: number, maxValue?: number) => ({
+  '@type': 'UnitPriceSpecification',
+  price: price.toFixed(2),
+  priceCurrency: 'TRY',
+  referenceQuantity: { '@type': 'QuantitativeValue', value: 1, unitCode, unitText: product.unit },
+  eligibleQuantity: { '@type': 'QuantitativeValue', minValue, ...(maxValue && { maxValue }), unitCode },
+});
+
+const productLd = {
+  '@type': 'Product',
+  '@id': `${absolute(url, Astro.site)}#product`,
+  url: absolute(url, Astro.site),
+  sku: `AP-${product.id}`,
+  name: product.name,
+  description,
+  image: large.map((l) => absolute(l.src, Astro.site)),
+  category: product.category.name,
+  brand: { '@type': 'Brand', name: 'Airpack Ambalaj' },
+  manufacturer: { '@id': organizationId(Astro.site) },
+  ...(roll
+    ? { height: { '@type': 'QuantitativeValue', value: product.width, unitCode: 'CMT' } }
+    : {
+        width: { '@type': 'QuantitativeValue', value: product.width, unitCode: 'CMT' },
+        height: { '@type': 'QuantitativeValue', value: product.height, unitCode: 'CMT' },
+      }),
+  additionalProperty: product.attributes.map((a) => ({ '@type': 'PropertyValue', name: a.name, value: a.value })),
+  offers: offer(product.price, {
+    eligibleQuantity: { '@type': 'QuantitativeValue', minValue: MIN_QTY, unitCode },
+    priceSpecification: roll
+      ? unitSpec(product.price, MIN_QTY)
+      : [unitSpec(product.price, MIN_QTY, BULK_MIN_QTY - 1), unitSpec(bulkPrice, BULK_MIN_QTY)],
+    // İade koşulları: /iade-ve-cayma/ sayfasıyla aynı (anlaşmalı kargo ile iade ücretsiz).
+    hasMerchantReturnPolicy: {
+      '@type': 'MerchantReturnPolicy',
+      applicableCountry: 'TR',
+      returnPolicyCountry: 'TR',
+      returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+      merchantReturnDays: LEGAL.withdrawalDays,
+      returnMethod: 'https://schema.org/ReturnByMail',
+      returnFees: 'https://schema.org/FreeReturn',
+      merchantReturnLink: absolute('/iade-ve-cayma/', Astro.site),
+    },
+    // Sipariş başına sabit kargo (pricing.ts). Ücretsiz kargo eşiği eklenirse burada da belirtilmeli.
+    shippingDetails: {
+      '@type': 'OfferShippingDetails',
+      shippingRate: { '@type': 'MonetaryAmount', value: SHIPPING_FEE, currency: 'TRY' },
+      shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'TR' },
+    },
+  }),
+};
+
+const crumbs = breadcrumbLd(
+  [
+    { name: 'Ana Sayfa', path: '/' },
+    { name: product.category.name, path: categoryUrl(product.category) },
+    { name: product.name, path: url },
+  ],
+  Astro.site,
+);
+const distance = (p: Product) => Math.abs(p.width - product.width) + Math.abs(p.height - product.height);
+const similar = products
+  .filter((p) => p.unit === product.unit && p.slug !== product.slug && p.name !== product.name)
+  .sort((a, b) => distance(a) - distance(b) || Math.abs(a.height - product.height) - Math.abs(b.height - product.height))
+  .slice(0, roll ? 7 : 6)
+  .sort((a, b) => a.height - b.height || a.width - b.width);
+const similarLabel = (p: Product) => (roll ? `${sizeLabel(p).replace(' rulo', '')} Hava Kanallı Rulo` : `${sizeLabel(p)} Airpack Poşet`);
+const waCompat = `Merhaba, ${product.name} hangi ürünlerle uyumlu? Bilgi almak istiyorum.`;
+---
+
+<BaseLayout
+  title={seoName}
+  description={description}
+  og={ogPath(productOgSlug(product.slug))}
+  imageAlt={product.imageAlt}
+  ogType="product"
+  jsonLd={[crumbs, productLd]}
+>
+  <section class="product-page">
+    <div class="container">
+      <a href="/magaza/" class="back"><Icon name="arrow-left" /> Kataloğa Dön</a>
+
+      <div class="layout">
+        <div class="left">
+          <div class="gallery">
+            <div class="main-img">
+              {
+                images.map((img, i) => (
+                  <Image
+                    src={img}
+                    alt={i === 0 ? product.imageAlt : product.galleryAlt[i - 1]}
+                    widths={[400, 600, 800, 1100]}
+                    sizes="(min-width: 1200px) 560px, (min-width: 900px) 46vw, 100vw"
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    fetchpriority={i === 0 ? 'high' : 'auto'}
+                    data-slide={i}
+                    hidden={i !== 0}
+                  />
+                ))
+              }
+              <button type="button" class="zoom" data-zoom aria-label="Görseli büyüt"><Icon name="zoom-in" /></button>
+            </div>
+            {
+              images.length > 1 && (
+                <div class="thumbs" role="group" aria-label="Ürün görselleri">
+                  {images.map((img, i) => (
+                    <button type="button" data-gallery-thumb={i} aria-pressed={i === 0 ? 'true' : 'false'} aria-label={`Görsel ${i + 1}`}>
+                      <Image src={img} alt="" width={160} height={160} fit="cover" />
+                    </button>
+                  ))}
+                </div>
+              )
+            }
+          </div>
+
+          {
+            !roll && (
+              <div class="compat">
+                <h2><Icon name="check" /> Uyumlu Olduğu Ürünler</h2>
+                <a href={whatsappLink(waCompat)} target="_blank" rel="noopener" class="chip">
+                  <i></i>Uyumlu Ürün İçin Whatsapp'tan Yazınız
+                </a>
+              </div>
+            )
+          }
+        </div>
+
+        <div class="right">
+          <div class="r-head">
+            <a href={categoryUrl(product.category)} class="cat">{product.category.name}</a>
+            <h1>{product.name}</h1>
+          </div>
+          <div class="desc" set:html={product.shortDescription} />
+
+          <div class="airpack-pricing-widget" data-pricing data-price={product.price} data-unit={product.unit}>
+            {
+              roll ? (
+                <div class="ap-tier-grid ap-tier-single">
+                  <div class="ap-tier-card ap-card-standard active">
+                    <div class="ap-card-header">
+                      <span class="ap-card-title">Metre Fiyatı</span>
+                      <span class="ap-radio-circle" />
+                    </div>
+                    <div>
+                      <div class="ap-card-price">
+                        {onSale && <del>{formatTRY(product.regularPrice)}</del>}
+                        {formatTRY(product.price)}
+                        <small>/m</small>
+                      </div>
+                      <div class="ap-card-sub">
+                        En az {MIN_QTY} metre · {QTY_STEP} metre ve katları
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+            <div class="ap-tier-grid" role="group" aria-label="Fiyat seçenekleri">
+              <button type="button" class="ap-tier-card ap-card-standard active" data-tier={MIN_QTY} aria-pressed="true">
+                <div class="ap-card-header">
+                  <span class="ap-card-title">Standart</span>
+                  <span class="ap-radio-circle"></span>
+                </div>
+                <div>
+                  <div class="ap-card-price">
+                    {onSale && <del>{formatTRY(product.regularPrice)}</del>}
+                    {formatTRY(product.price)}
+                  </div>
+                  <div class="ap-card-sub">Adet fiyatı</div>
+                </div>
+              </button>
+              <button type="button" class="ap-tier-card ap-card-bulk" data-tier={BULK_MIN_QTY} aria-pressed="false">
+                <span class="ap-discount-tag">İSKONTOLU</span>
+                <div class="ap-card-header">
+                  <span class="ap-card-title">{formatNumber(BULK_MIN_QTY)} Adet Al</span>
+                  <span class="ap-radio-circle"></span>
+                </div>
+                <div>
+                  <div class="ap-card-price">{formatTRY(bulkPrice)}<small>/ad.</small></div>
+                  <div class="ap-card-sub text-green">{formatNumber(BULK_MIN_QTY)}+ toptan iskonto</div>
+                </div>
+              </button>
+            </div>
+              )
+            }
+
+            <div class="ap-qty-row">
+              <div class="ap-qty-counter">
+                <button type="button" class="ap-qty-btn" data-step="-1" aria-label={roll ? 'Metreyi azalt' : 'Adedi azalt'}>−</button>
+                <input
+                  type="number"
+                  id="apQuantityInput"
+                  min={MIN_QTY}
+                  step={QTY_STEP}
+                  value={MIN_QTY}
+                  inputmode="numeric"
+                  aria-label={roll ? 'Metre' : 'Adet'}
+                />
+                <button type="button" class="ap-qty-btn" data-step="1" aria-label={roll ? 'Metreyi artır' : 'Adedi artır'}>+</button>
+              </div>
+              <div class="ap-total-box">
+                <div class="ap-total-price" data-total>{formatTRY(product.price * MIN_QTY)}</div>
+                <div class="ap-unit-price" data-unit>{formatTRY(product.price)}/{unit.short}</div>
+              </div>
+            </div>
+
+            <button type="button" class="ap-submit-btn" data-add-to-cart data-qty-from="#apQuantityInput" data-slug={product.slug} data-name={product.name} data-price={product.price} data-thumb={thumb} data-unit={product.unit}>
+              <Icon name="shopping-cart" /> <span data-add-label>{MIN_QTY} {unit.long} Sepete Ekle</span>
+            </button>
+          </div>
+
+          <div class="r-specs">
+          <h2 class="specs-title"><Icon name="shield" /> Teknik Özellikler</h2>
+          <dl class="specs">
+            {
+              product.attributes.map((a) => (
+                <div>
+                  <dt>{a.name}</dt>
+                  <dd>{a.value}</dd>
+                </div>
+              ))
+            }
+          </dl>
+          </div>
+
+          <div class="r-similar">
+          <h2 class="specs-title"><Icon name="layers" /> {roll ? 'Diğer Rulo Yükseklikleri' : 'Benzer Ebatlar'}</h2>
+          <ul class="similar">
+            {
+              similar.map((p) => (
+                <li>
+                  <a href={productUrl(p)} class="chip">
+                    <i />
+                    {similarLabel(p)}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+          <p class="guide-links">
+            {
+              roll ? (
+                <>
+                  Hazır ebat mı lazım? <a href="/kategori/hazir-paketler/">Hazır airpack poşet modellerine</a> göz atın. Kullanım için <a href="/airpack-nasil-sisirilir/">airpack nasıl şişirilir?</a> rehberine bakın.
+                </>
+              ) : (
+                <>
+                  Doğru ebadı seçmek için <a href="/airpack-olcu-rehberi/">Airpack Ölçü Rehberi</a>’ne bakın. Rulo olarak mı
+                  lazım? <a href="/kategori/rulo-paketler/">Hava kanallı rulo</a> modellerimizi inceleyin. Ürününüze göre paketleme önerileri <a href="/hava-kanalli-ambalaj/">ambalaj rehberimizde</a>.
+                </>
+              )
+            }
+          </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <dialog class="lightbox" data-lightbox aria-label="Ürün görseli">
+    <button type="button" class="lb-close" data-lb-close aria-label="Kapat"><Icon name="x" /></button>
+    <img alt={product.name} data-lb-img />
+  </dialog>
+  <script type="application/json" id="zoom-images" set:html={JSON.stringify(large.map((l) => l.src))} />
+</BaseLayout>
+
+<script>
+  import { BULK_DISCOUNT, MIN_QTY, UNIT_LABEL, formatNumber, formatTRY, hasBulkDiscount, normalizeQuantity, stepQuantity, unitPrice, type Unit } from '../../lib/pricing';
+
+  // Galeri
+  const slides = [...document.querySelectorAll<HTMLImageElement>('[data-slide]')];
+  const thumbs = [...document.querySelectorAll<HTMLButtonElement>('[data-gallery-thumb]')];
+  let active = 0;
+  thumbs.forEach((t, i) =>
+    t.addEventListener('click', () => {
+      active = i;
+      slides.forEach((s, j) => (s.hidden = j !== i));
+      thumbs.forEach((b, j) => b.setAttribute('aria-pressed', String(j === i)));
+    }),
+  );
+
+  const lightbox = document.querySelector<HTMLDialogElement>('[data-lightbox]')!;
+  const zoomImages: string[] = JSON.parse(document.getElementById('zoom-images')!.textContent!);
+  document.querySelector('[data-zoom]')!.addEventListener('click', () => {
+    lightbox.querySelector<HTMLImageElement>('[data-lb-img]')!.src = zoomImages[active];
+    lightbox.showModal();
+  });
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox || (e.target as Element).closest('[data-lb-close]')) lightbox.close();
+  });
+
+  // Fiyat widget'ı
+  const box = document.querySelector<HTMLElement>('[data-pricing]')!;
+  const base = Number(box.dataset.price);
+  const unit: Unit = box.dataset.unit === 'metre' ? 'metre' : 'adet';
+  const label = UNIT_LABEL[unit];
+  const input = document.getElementById('apQuantityInput') as HTMLInputElement;
+  const tiers = [...box.querySelectorAll<HTMLButtonElement>('[data-tier]')];
+  const submit = box.querySelector<HTMLButtonElement>('.ap-submit-btn')!;
+
+  const render = () => {
+    const q = normalizeQuantity(Number(input.value));
+    const bulk = hasBulkDiscount(q, unit);
+    const price = unitPrice(base, q, unit);
+    box.querySelector('[data-total]')!.textContent = formatTRY(price * q);
+    const unitEl = box.querySelector<HTMLElement>('[data-unit]')!;
+    unitEl.textContent = bulk ? `✓ ${formatTRY(price)}/ad. İskontolu (-${formatTRY(BULK_DISCOUNT)})` : `${formatTRY(price)}/${label.short}`;
+    unitEl.classList.toggle('is-discount', bulk);
+    tiers.forEach((t) => {
+      const on = hasBulkDiscount(Number(t.dataset.tier), unit) === bulk;
+      t.classList.toggle('active', on);
+      t.setAttribute('aria-pressed', String(on));
+    });
+    submit.classList.toggle('is-bulk-btn', bulk);
+    box.querySelector('[data-add-label]')!.textContent = `${formatNumber(q)} ${label.long}${bulk ? ' (İskontolu)' : ''} Sepete Ekle`;
+  };
+
+  box.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b) =>
+    b.addEventListener('click', () => {
+      input.value = String(stepQuantity(Number(input.value), Number(b.dataset.step) as 1 | -1));
+      render();
+    }),
+  );
+  tiers.forEach((t) =>
+    t.addEventListener('click', () => {
+      input.value = t.dataset.tier!;
+      render();
+    }),
+  );
+  input.addEventListener('input', render);
+  input.addEventListener('change', () => {
+    input.value = String(normalizeQuantity(Number(input.value) || MIN_QTY));
+    render();
+  });
+  render();
+</script>
+
+<style>
+  .product-page {
+    background-color: var(--bg-color);
+    padding: 100px 0 6rem;
+  }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 3rem;
+  }
+
+  .back:hover {
+    color: var(--primary);
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 5rem;
+    align-items: start;
+  }
+
+  .left {
+    position: sticky;
+    top: calc(var(--header-height) + 1.5rem);
+  }
+
+  .main-img {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--border-color);
+  }
+
+  .main-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .zoom {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+    font-size: 1rem;
+  }
+
+  .thumbs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+
+  .thumbs button {
+    aspect-ratio: 3 / 2;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid transparent;
+    opacity: 0.75;
+    transition: all var(--transition-fast);
+  }
+
+  .thumbs button[aria-pressed='true'] {
+    border-color: var(--primary);
+    opacity: 1;
+  }
+
+  .thumbs img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .compat {
+    margin-top: 2rem;
+    padding: 1.25rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+  }
+
+  .compat h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .compat h2 .icon {
+    color: var(--success);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  .chip i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
+  }
+
+  .chip:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .cat {
+    display: inline-block;
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-size: clamp(2.1rem, 3.2vw, 2.5rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+
+  .desc {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+
+  .desc :global(p) {
+    margin-bottom: 0.9rem;
+  }
+
+  .desc :global(strong) {
+    color: #334155;
+  }
+
+  .desc :global(ul) {
+    list-style: disc;
+    padding-left: 1.25rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .desc :global(li) {
+    margin-bottom: 0.6rem;
+  }
+
+  /* Fiyat widget'ı — canlı sitedeki stil ile birebir */
+  .airpack-pricing-widget {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  .ap-tier-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .ap-tier-single {
+    grid-template-columns: 1fr;
+  }
+
+  .ap-tier-card {
+    border-radius: 14px;
+    padding: 16px 14px;
+    position: relative;
+    transition: all 0.2s ease;
+    border: 1.5px solid #e2e8f0;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 94px;
+    text-align: left;
+  }
+
+  .ap-card-standard.active {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.04);
+  }
+
+  .ap-card-bulk {
+    border-color: #bbf7d0;
+    background: #fcfdfc;
+  }
+
+  .ap-card-bulk.active {
+    border-color: #16a34a;
+    background: #f0fdf4;
+  }
+
+  .ap-card-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #334155;
+  }
+
+  .ap-card-standard.active .ap-card-title {
+    color: #2563eb;
+  }
+
+  .ap-card-bulk.active .ap-card-title {
+    color: #15803d;
+  }
+
+  .ap-discount-tag {
+    position: absolute;
+    top: -8px;
+    right: 10px;
+    background: #15803d;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1;
+    padding: 3px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.3px;
+    box-shadow: 0 1px 4px rgba(22, 163, 74, 0.25);
+    white-space: nowrap;
+  }
+
+  .ap-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .ap-radio-circle {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    border-radius: 50%;
+    border: 2px solid #cbd5e1;
+    background: #ffffff;
+    transition: all 0.2s ease;
+  }
+
+  .ap-card-standard.active .ap-radio-circle {
+    border: 4.5px solid #3b82f6;
+  }
+
+  .ap-card-bulk.active .ap-radio-circle {
+    border: 4.5px solid #16a34a;
+  }
+
+  .ap-card-price {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  .ap-card-price del {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: #94a3b8;
+  }
+
+  .ap-card-bulk.active .ap-card-price {
+    color: #15803d;
+  }
+
+  .ap-card-price small {
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748b;
+    margin-left: 2px;
+  }
+
+  .ap-card-sub {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  .ap-card-sub.text-green {
+    color: #15803d;
+    font-weight: 600;
+  }
+
+  .ap-qty-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 12px;
+  }
+
+  .ap-qty-counter {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+    height: 48px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .ap-qty-btn {
+    width: 44px;
+    height: 100%;
+    font-size: 20px;
+    font-weight: 600;
+    color: #334155;
+  }
+
+  .ap-qty-btn:hover {
+    background: #e2e8f0;
+  }
+
+  #apQuantityInput {
+    width: 60px;
+    height: 100%;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-size: 17px;
+    font-weight: 500;
+    outline: none;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  #apQuantityInput::-webkit-outer-spin-button,
+  #apQuantityInput::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .ap-total-box {
+    text-align: right;
+  }
+
+  .ap-total-price {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  .ap-unit-price {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 3px;
+    font-weight: 500;
+  }
+
+  .ap-unit-price:global(.is-discount) {
+    color: #15803d;
+    font-weight: 600;
+  }
+
+  .ap-submit-btn {
+    width: 100%;
+    background: #2563eb;
+    color: #ffffff;
+    border-radius: 999px;
+    padding: 15px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+    transition: all 0.2s ease;
+  }
+
+  .ap-submit-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.45);
+  }
+
+  .ap-submit-btn:global(.is-bulk-btn) {
+    background: #3c8242;
+    box-shadow: 0 4px 14px rgba(71, 151, 78, 0.35);
+  }
+
+  .ap-submit-btn:global(.is-bulk-btn):hover {
+    background: #336f38;
+  }
+
+  .specs-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.35rem;
+    margin: 2.5rem 0 1rem;
+  }
+
+  .specs-title .icon {
+    color: var(--primary);
+  }
+
+  .specs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .specs div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+  }
+
+  .specs dt {
+    color: var(--text-muted);
+  }
+
+  .similar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .guide-links {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .guide-links a {
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  .guide-links a:hover {
+    text-decoration: underline;
+  }
+
+  .specs dd {
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .lightbox {
+    margin: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    max-width: min(92vw, 900px);
+    max-height: 92vh;
+    background: #fff;
+  }
+
+  .lightbox::backdrop {
+    background: rgba(15, 23, 42, 0.8);
+  }
+
+  .lightbox img {
+    max-height: 92vh;
+    width: auto;
+    margin: 0 auto;
+  }
+
+  .lb-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: var(--shadow-md);
+  }
+
+  @media (max-width: 900px) {
+    .product-page {
+      padding-top: 1.25rem;
+    }
+
+    .back {
+      margin-bottom: 1rem;
+    }
+
+    /* Mobilde iki sütunun öğeleri tek akışta yeniden sıralanır: başlık, görsel, fiyat, açıklama, özellikler. */
+    .layout {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .left,
+    .right {
+      display: contents;
+    }
+
+    .r-head {
+      order: 1;
+    }
+
+    .gallery {
+      order: 2;
+      margin-bottom: 1.5rem;
+    }
+
+    .airpack-pricing-widget {
+      order: 3;
+    }
+
+    .desc {
+      order: 4;
+      margin: 2rem 0 0;
+    }
+
+    .r-specs {
+      order: 5;
+    }
+
+    .compat {
+      order: 6;
+    }
+
+    .r-similar {
+      order: 7;
+    }
+
+    .main-img {
+      aspect-ratio: 4 / 3;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .airpack-pricing-widget {
+      padding: 16px;
+      border-radius: 16px;
+    }
+
+    .ap-tier-grid {
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .ap-tier-card {
+      padding: 12px 10px;
+      border-radius: 12px;
+      min-height: 86px;
+    }
+
+    .ap-card-title {
+      font-size: 12px;
+    }
+
+    .ap-card-price {
+      font-size: 17px;
+    }
+
+    .ap-card-sub {
+      font-size: 12px;
+    }
+
+    .ap-qty-counter {
+      height: 46px;
+    }
+
+    .ap-qty-btn {
+      width: 44px;
+      font-size: 18px;
+    }
+
+    #apQuantityInput {
+      width: 48px;
+      font-size: 15px;
+    }
+
+    .ap-total-price {
+      font-size: 18px;
+    }
+
+    .ap-submit-btn {
+      padding: 13px 16px;
+      font-size: 14px;
+    }
+  }
+</style>

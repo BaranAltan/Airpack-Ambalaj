@@ -1,0 +1,64 @@
+---
+import type { GetStaticPaths } from 'astro';
+import ShopAbout from '../../components/ShopAbout.astro';
+import ShopView from '../../components/ShopView.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { PAGE_SIZE, bags, productUrl, products, sizeLabel } from '../../data/products';
+import { absolute, breadcrumbLd } from '../../lib/seo';
+
+// /magaza/, /magaza/page/2/, /magaza/page/3/ … (WordPress ile aynı adresler)
+export const getStaticPaths = (() => {
+  const totalPages = Math.ceil(products.length / PAGE_SIZE);
+  return Array.from({ length: totalPages }, (_, i) => ({
+    params: { page: i === 0 ? undefined : `page/${i + 1}` },
+    props: { page: i + 1, totalPages },
+  }));
+}) satisfies GetStaticPaths;
+
+const { page, totalPages } = Astro.props;
+const pageUrl = (n: number) => (n === 1 ? '/magaza/' : `/magaza/page/${n}/`);
+const items = products.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+const title = 'Airpack Poşet ve Rulo Fiyatları';
+const description =
+  page === 1
+    ? `Toptan airpack poşet ve hava kanallı rulo fiyatları. ${bags.length} farklı ebatta 90 mikron poşet (50’li paketler, 1.000+ adette iskonto) ve metreyle satılan ${products.length - bags.length} rulo modeli.`
+    : `Airpack poşet ve hava kanallı rulo fiyatları, sayfa ${page}/${totalPages}: ${sizeLabel(items[0])} – ${sizeLabel(items.at(-1)!)}. 50’li paketler, metreyle rulo, 1.000+ adette iskonto.`;
+
+const itemList = {
+  '@type': 'ItemList',
+  itemListElement: items.map((p, i) => ({
+    '@type': 'ListItem',
+    position: (page - 1) * PAGE_SIZE + i + 1,
+    url: absolute(productUrl(p), Astro.site),
+    name: p.name,
+  })),
+};
+const crumbs = breadcrumbLd(
+  [
+    { name: 'Ana Sayfa', path: '/' },
+    { name: 'Mağaza', path: '/magaza/' },
+  ],
+  Astro.site,
+);
+---
+
+<BaseLayout
+  title={page === 1 ? title : `${title} - Sayfa ${page}`}
+  description={description}
+  jsonLd={[crumbs, itemList]}
+  prev={page > 1 ? pageUrl(page - 1) : undefined}
+  next={page < totalPages ? pageUrl(page + 1) : undefined}
+>
+  <ShopView
+    badge="Hava Kanallı Ambalaj Çözümleri"
+    title="Ürün Kataloğu"
+    lead="Hassas ve kırılabilir ürünleriniz için maksimum koruma sağlayan yenilikçi hava kanallı ambalaj çözümlerimizi keşfedin."
+    items={items}
+    page={page}
+    totalPages={totalPages}
+    pageUrl={pageUrl}
+    total={products.length}
+  >
+    {page === 1 && <ShopAbout slot="about" kind="magaza" />}
+  </ShopView>
+</BaseLayout>

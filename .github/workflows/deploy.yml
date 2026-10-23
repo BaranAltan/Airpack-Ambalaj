@@ -1,0 +1,61 @@
+# main dalına her push'ta siteyi derler ve SSH (rsync) ile cPanel sunucusuna yükler.
+# Gerekli GitHub secrets: SSH_HOST, SSH_PORT, SSH_USER, SSH_PRIVATE_KEY, SSH_KNOWN_HOSTS, DEPLOY_PATH
+name: Yayına al
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Aynı anda tek yükleme çalışsın; yeni push gelirse sıraya girer.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      # Paylaşım (OG) görsellerindeki yazılar için Inter yazı tipi
+      - name: Yazı tipini kur
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-inter
+
+      - name: Bağımlılıkları kur
+        run: npm ci
+
+      - name: Siteyi derle
+        run: npm run build
+
+      - name: SSH anahtarını hazırla
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      # --delete-delay: sunucuda dist'te olmayan dosyalar yükleme bittikten sonra silinir.
+      # Korunanlar (silinmez): SSL doğrulama klasörü, cgi-bin, Google doğrulama dosyası.
+      - name: Sunucuya yükle
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          rsync -rlptvz --delete-delay --chmod=D755,F644 \
+            --exclude='.well-known/' \
+            --exclude='cgi-bin/' \
+            --exclude='google*.html' \
+            -e "ssh -i ~/.ssh/deploy_key -p $SSH_PORT -o BatchMode=yes" \
+            dist/ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"

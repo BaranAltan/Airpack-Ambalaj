@@ -1,0 +1,815 @@
+---
+import { Image } from 'astro:assets';
+import ctaBg from '../assets/site/toptan-airpack.webp';
+import hazirImg from '../assets/site/hazir-airpack-modelleri.jpg';
+import olcuImg from '../assets/site/airpack-olculeri.jpg';
+import ruloImg from '../assets/site/rulo-airpack.jpg';
+import FAQ from '../components/FAQ.astro';
+import Icon from '../components/Icon.astro';
+import ProductCard from '../components/ProductCard.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { faq } from '../data/faq';
+import { bags, products } from '../data/products';
+import { whatsappLink } from '../data/site';
+
+const features = [
+  {
+    icon: 'shield-check',
+    title: 'Maksimum Koruma',
+    text: 'Bağımsız hava kanalları sayesinde şiddetli darbelere karşı mükemmel şok emilimi sağlar. Bir kanal patlasa bile diğerleri şişenizi korumaya devam eder.',
+  },
+  {
+    icon: 'trending-down',
+    title: 'Maliyetleri Düşürür',
+    text: 'Kırık ürün iadelerini ve telafi kargo masraflarını sıfıra indirir. Müşteri memnuniyetini artırarak markanıza değer katar.',
+  },
+  {
+    icon: 'package',
+    title: 'Depolama Avantajı',
+    text: 'Şişirilmeden önce tamamen düzdür. Geleneksel koruyuculara göre depoda %90 oranında yer tasarrufu sağlar.',
+  },
+  {
+    icon: 'wind',
+    title: 'Kolay Kullanım',
+    text: 'Küçük bir kompresör veya el pompasıyla saniyeler içinde şişirilir. Personelinizin paketleme süresini ciddi oranda kısaltır.',
+  },
+] as const;
+
+const tiles = [
+  { href: '/kategori/hazir-paketler/', img: hazirImg, alt: 'Hazır airpack paket içinde bal kavanozu', title: 'Hazır Paket', text: 'Ürüne göre özel kalıplar', cta: 'Kategoriyi İncele' },
+  { href: '/kategori/rulo-paketler/', img: ruloImg, alt: 'Rulo airpack ambalajın makasla kesilmesi', title: 'Rulo Modeller', text: 'İstenilen uzunlukta kesilebilir', cta: 'Kategoriyi İncele' },
+  { href: '/airpack-olcu-rehberi/', img: olcuImg, alt: 'Airpack poşetin şerit metreyle ölçülmesi', title: 'Ölçü Rehberi', text: 'Doğru ambalaj ebatını bulun', cta: 'Rehbere Git' },
+];
+
+const testimonials = [
+  { name: 'Ali Y.', company: 'Gurme Zeytinyağları', text: 'Aylık 5000 şişe zeytinyağı kargoluyoruz, Airpack’e geçtiğimizden beri kırılma oranımız sıfıra indi. Harika bir teknoloji.' },
+  { name: 'Zeynep K.', company: 'TechElektronik', text: 'Tablet ve laptop gönderimlerimizde klasik köpüklere göre depomuzda %90 yer tasarrufu sağladık. Üstelik müşteriye giden paketler çok daha premium görünüyor.' },
+  { name: 'Baran A.', company: 'Altan Doğal Ürünler', text: 'Özel pekmezlerimizin gönderiminde bu ambalajları kullanıyoruz. Özel logolu üretim yaptırmamız marka değerimize çok katkı sağladı.' },
+];
+
+---
+
+<BaseLayout
+  title="Hava Kanallı Ambalaj, Toptan Airpack Poşet"
+  description={`Toptan airpack poşet ve hava kanallı rulo üreticisi. 12×19 cm’den 54×48 cm’e ${bags.length} hazır ebat, metreyle rulo, 90 mikron, 1.000+ adette iskonto.`}
+>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="blob blob-1" aria-hidden="true"></div>
+    <div class="blob blob-2" aria-hidden="true"></div>
+    <div class="container hero-inner">
+      <span class="hero-badge"><i></i>B2B ve E-Ticaret İçin Kesin Çözüm</span>
+      <h1>Ürünleriniz Bize <span>Emanet</span></h1>
+      <p class="hero-text">
+        Türkiye'nin lider hava kanallı ambalaj üreticisi olarak;<br />
+        kırılma kayıplarınızı sıfıra indiriyor, deponuzda %90 yer tasarrufu<br />
+        sağlıyoruz.
+      </p>
+      <div class="hero-btns">
+        <a href="/magaza/" class="btn btn-primary">Ürünleri İncele</a>
+        <a href="/bize-ulasin/" class="btn btn-outline">Toptan Fiyat Al</a>
+      </div>
+      <div class="hero-checks">
+        <div><Icon name="check-circle" /><span>Sıfır<br />Kırılma Riski</span></div>
+        <div><Icon name="check-circle" /><span>Üreticiden<br />Avantajlı Fiyat</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ÖZELLİKLER -->
+  <section class="features">
+    <div class="container grid-cols-4">
+      {
+        features.map((f) => (
+          <div class="feature">
+            <span class="f-icon">
+              <Icon name={f.icon} />
+            </span>
+            <h2>{f.title}</h2>
+            <p>{f.text}</p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- KATEGORİ KARTLARI -->
+  <section class="tiles-section lazy-section">
+    <div class="container">
+      <div class="section-title">
+        <h2>Size Uygun Çözümü Bulun</h2>
+        <p>Hazır kalıplı paketler, istenilen uzunlukta kesilebilen rulolar ve doğru ebat için ölçü rehberi.</p>
+      </div>
+      <div class="grid-cols-3 tiles">
+        {
+          tiles.map((t) => (
+            <a href={t.href} class="tile">
+              <Image src={t.img} alt={t.alt} widths={[400, 600, 800]} sizes="(min-width: 1200px) 380px, (min-width: 768px) 33vw, 100vw" />
+              <div class="tile-body">
+                <h3>{t.title}</h3>
+                <p>{t.text}</p>
+                <span class="tile-btn">
+                  {t.cta} <Icon name="arrow-right" />
+                </span>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ÜRÜNLER -->
+  <section class="products-section lazy-section">
+    <div class="container">
+      <div class="section-title">
+        <h2 class="big-title">Hangi Ürünler İçin Uygun?</h2>
+        <p>Kırılma riski olan tüm ürünleriniz için özel ölçülerde üretim yapıyoruz.</p>
+      </div>
+      <div class="grid-cols-3 home-products">
+        {products.slice(0, 6).map((p) => <ProductCard product={p} />)}
+      </div>
+      <div class="center">
+        <a href="/magaza/" class="btn btn-primary small-btn">Tüm Ürünleri Görüntüle</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- YORUMLAR -->
+  <section class="testimonials lazy-section">
+    <div class="container">
+      <div class="section-title">
+        <h2>Onlar Bize Emanet Etti</h2>
+        <p>Yüzlerce işletme kırılma maliyetlerini Airpack ile sıfırladı. İşte onlardan bazıları.</p>
+      </div>
+      <div class="slider" data-slider>
+        <button type="button" class="arrow prev" data-prev aria-label="Önceki yorum"><Icon name="chevron-left" /></button>
+        <div class="track" data-track>
+          {
+            testimonials.map((t) => (
+              <figure class="t-card">
+                <blockquote>“{t.text}”</blockquote>
+                <figcaption>
+                  <strong>{t.name}</strong>
+                  <span>{t.company}</span>
+                </figcaption>
+              </figure>
+            ))
+          }
+        </div>
+        <button type="button" class="arrow next" data-next aria-label="Sonraki yorum"><Icon name="chevron-right" /></button>
+      </div>
+      <div class="dots" data-dots>
+        {testimonials.map((_, i) => <button type="button" aria-label={`${i + 1}. yorum`} data-dot={i} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- SSS -->
+  <section class="faq-section lazy-section">
+    <div class="container">
+      <div class="section-title">
+        <h2>Sıkça Sorulan Sorular</h2>
+        <p>Hava kanallı ambalaj sistemleri hakkında aklınıza takılan her şeyin cevabı burada.</p>
+      </div>
+      <FAQ items={faq} />
+      <p class="faq-more"><a href="/sikca-sorulan-sorular/">Tüm soruları görün <Icon name="arrow-right" /></a></p>
+    </div>
+  </section>
+
+  <!-- NUMUNE CTA -->
+  <section class="cta-section lazy-section">
+    <div class="container">
+      <div class="cta">
+        <Image src={ctaBg} alt="" widths={[600, 1200]} sizes="(min-width: 1200px) 1152px, 100vw" class="cta-bg" />
+        <div class="cta-text">
+          <span class="cta-pill"><Icon name="sparkle" /> Kurumsal Çözümler</span>
+          <h2>İşletmeniz İçin Ücretsiz Numune İsteyin</h2>
+          <p>
+            Müşterilerinize sadece bir kargo kutusu değil, muazzam bir kutu açılış (unboxing) deneyimi sunun. Özel kalıp
+            ambalajlar için teklif alın.
+          </p>
+        </div>
+        <div class="cta-btns">
+          <a href={whatsappLink('Merhaba, işletmemiz için airpack numune talep etmek istiyorum.')} class="cta-btn-white" target="_blank" rel="noopener">
+            Numune Talep Et <Icon name="arrow-right" />
+          </a>
+          <a href="/bize-ulasin/" class="cta-btn-ghost"><Icon name="phone" /> Bize Ulaşın</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const slider = document.querySelector<HTMLElement>('[data-slider]')!;
+  const track = slider.querySelector<HTMLElement>('[data-track]')!;
+  const dots = [...document.querySelectorAll<HTMLButtonElement>('[data-dot]')];
+  const cardWidth = () => (track.firstElementChild as HTMLElement).offsetWidth + 24;
+
+  const current = () => Math.round(track.scrollLeft / cardWidth());
+  const go = (i: number) => {
+    const max = track.children.length - 1;
+    const target = i < 0 ? max : i > max ? 0 : i;
+    track.scrollTo({ left: target * cardWidth(), behavior: 'smooth' });
+  };
+  const sync = () => dots.forEach((d, i) => d.setAttribute('aria-current', String(i === current())));
+
+  slider.querySelector('[data-prev]')!.addEventListener('click', () => go(current() - 1));
+  slider.querySelector('[data-next]')!.addEventListener('click', () => go(current() + 1));
+  dots.forEach((d, i) => d.addEventListener('click', () => go(i)));
+  track.addEventListener('scroll', () => requestAnimationFrame(sync), { passive: true });
+  sync();
+</script>
+
+<style>
+  /* HERO */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    /* Canlı sitedeki gibi tam ekran: header'ın altına uzanır, içerik ekranın ortasında kalır */
+    margin-top: calc(-1 * var(--header-height));
+    min-height: 100svh;
+    padding: var(--header-height) 0;
+    background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
+  }
+
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .blob-1 {
+    width: 520px;
+    height: 520px;
+    left: -120px;
+    bottom: -160px;
+    background: radial-gradient(circle, rgba(96, 165, 250, 0.18) 0%, transparent 65%);
+  }
+
+  .blob-2 {
+    width: 760px;
+    height: 760px;
+    right: -180px;
+    top: -120px;
+    background: radial-gradient(circle, rgba(96, 165, 250, 0.22) 0%, transparent 65%);
+  }
+
+  .hero-inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 8px 16px;
+    line-height: 1.6;
+    background: #fff;
+    border-radius: 999px;
+    color: var(--primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-badge i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--success);
+  }
+
+  .hero h1 {
+    font-size: clamp(3rem, 5.5vw, 4rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero h1 span {
+    display: block;
+    color: var(--primary);
+  }
+
+  .hero-text {
+    line-height: 1.8;
+    margin-bottom: 2rem;
+  }
+
+  .hero-btns {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .hero-btns .btn {
+    padding: 10px 32px;
+    line-height: 1.8;
+    font-weight: 400;
+    border-radius: 25px;
+  }
+
+  .hero-btns .btn-outline:hover {
+    color: #fff;
+  }
+
+  .hero-checks {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1.75rem;
+  }
+
+  .hero-checks div {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .hero-checks .icon {
+    color: var(--success);
+    font-size: 1.25rem;
+    margin-top: 0.15rem;
+  }
+
+  /* ÖZELLİKLER */
+  .features {
+    background: var(--bg-card);
+    padding: 100px 0;
+  }
+
+  .features .grid-cols-4 {
+    gap: 20px;
+  }
+
+  .feature {
+    background: var(--bg-color);
+    border: 1px solid #f3f4f6;
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition:
+      transform var(--transition-normal),
+      box-shadow var(--transition-normal);
+  }
+
+  .feature:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .f-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: #cae1ff;
+    color: var(--primary);
+    font-size: 36px;
+    margin-bottom: 28px;
+  }
+
+  .feature h2 {
+    font-size: 1.25rem;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+
+  .feature p {
+    line-height: 1.8;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  /* KATEGORİ KARTLARI */
+  .tiles-section {
+    background: var(--bg-color);
+    padding: 100px 0;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .tiles {
+    gap: 40px;
+  }
+
+  .tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 420px;
+    border-radius: 24px;
+    overflow: hidden;
+    background-color: #0f172a;
+    box-shadow: var(--shadow-md);
+    isolation: isolate;
+    transition:
+      transform 0.4s ease,
+      box-shadow 0.4s ease;
+  }
+
+  .tile img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.85;
+    z-index: -2;
+    transition: opacity 0.4s ease;
+  }
+
+  .tile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.4) 45%, transparent 75%);
+  }
+
+  .tile:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 25px 50px -12px rgba(37, 99, 235, 0.25);
+  }
+
+  .tile:hover img {
+    opacity: 1;
+  }
+
+  .tile-body {
+    padding: 1.75rem;
+  }
+
+  .tile h3 {
+    color: #fff;
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 0.15rem;
+  }
+
+  .tile p {
+    color: var(--primary-light);
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+  }
+
+  .tile-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background-color: var(--primary);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 9999px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.6;
+  }
+
+  /* ÜRÜNLER */
+  .products-section {
+    background: var(--bg-card);
+    padding: 100px 0;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .big-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .home-products {
+    gap: 30px;
+  }
+
+  .center {
+    text-align: center;
+    margin-top: 30px;
+  }
+
+  .small-btn {
+    padding: 10px 32px;
+    line-height: 1.8;
+    font-weight: 400;
+    border-radius: 25px;
+  }
+
+  /* YORUMLAR */
+  .testimonials {
+    background: var(--bg-color);
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 100px 0;
+  }
+
+  .slider {
+    position: relative;
+    margin: 0 auto;
+    padding: 0 50px;
+  }
+
+  .track {
+    display: flex;
+    gap: 40px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding: 0.5rem 0.25rem 1rem;
+  }
+
+  .track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .t-card {
+    flex: 0 0 calc((100% - 80px) / 3);
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-height: 330px;
+    padding: 32px;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+  }
+
+  blockquote {
+    font-style: italic;
+    color: var(--text-main);
+    line-height: 1.8;
+  }
+
+  figcaption {
+    display: flex;
+    flex-direction: column;
+  }
+
+  figcaption strong {
+    color: var(--primary);
+    font-size: 18px;
+    line-height: 1.4;
+  }
+
+  figcaption span {
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-60%);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 1.25rem;
+  }
+
+  .arrow:hover {
+    color: var(--primary);
+  }
+
+  .prev {
+    left: 0;
+  }
+
+  .next {
+    right: 0;
+  }
+
+  .dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  /* Görünen nokta 6px, tıklama alanı 24px (erişilebilirlik) */
+  .dots {
+    gap: 0;
+  }
+
+  .dots button {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dots button::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #cbd5e1;
+  }
+
+  .dots button[aria-current='true']::before {
+    background: var(--text-main);
+  }
+
+  /* SSS */
+  .faq-more {
+    margin-top: 1.75rem;
+    text-align: center;
+  }
+
+  .faq-more a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  .faq-more a:hover {
+    text-decoration: underline;
+  }
+
+  .faq-section {
+    background: var(--bg-card);
+    padding: 100px 0;
+  }
+
+  /* CTA */
+  .cta-section {
+    background: var(--bg-color);
+    padding: 100px 0;
+  }
+
+  .cta {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 64px;
+    border-radius: 24px;
+    isolation: isolate;
+    background: #1e3a8a;
+  }
+
+  .cta :global(.cta-bg) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+  }
+
+  .cta::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(90deg, rgba(30, 58, 138, 0.92) 0%, rgba(37, 99, 235, 0.72) 100%);
+  }
+
+  .cta-text {
+    max-width: 620px;
+  }
+
+  .cta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    border: 1px solid rgba(125, 211, 252, 0.3);
+    background: rgba(56, 189, 248, 0.2);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .cta h2 {
+    color: #fff;
+    font-size: clamp(1.75rem, 3.2vw, 2.25rem);
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .cta p {
+    color: #e0f2fe;
+    font-size: 1.125rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .cta-btns {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+
+  .cta-btn-white,
+  .cta-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+  }
+
+  .cta-btn-white {
+    background: #fff;
+    color: #0f4c75;
+    font-weight: 700;
+  }
+
+  .cta-btn-white:hover {
+    transform: translateY(-2px);
+  }
+
+  .cta-btn-ghost {
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  .cta-btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  /* Duyarlı */
+  @media (max-width: 1024px) {
+    .features .grid-cols-4 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 900px) {
+    .t-card {
+      flex-basis: calc((100% - 40px) / 2);
+    }
+
+    .cta {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .tiles {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .t-card {
+      flex-basis: 100%;
+    }
+
+    .slider {
+      padding: 0 2rem;
+    }
+
+    .features,
+    .tiles-section,
+    .products-section,
+    .testimonials,
+    .faq-section,
+    .cta-section {
+      padding: 64px 0;
+    }
+
+    .hero-checks {
+      gap: 1.25rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .features .grid-cols-4 {
+      grid-template-columns: 1fr;
+    }
+
+    .cta {
+      padding: 2rem 1.5rem;
+    }
+  }
+</style>

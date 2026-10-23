@@ -1,0 +1,66 @@
+---
+import ArticlePage from '../components/ArticlePage.astro';
+import { PILLAR } from '../data/guides';
+import { bags, products } from '../data/products';
+import { BULK_DISCOUNT, BULK_MIN_QTY, MIN_QTY, formatNumber, formatTRY } from '../lib/pricing';
+
+const rolls = products.filter((p) => p.unit === 'metre');
+const first = bags.reduce((a, b) => (a.width * a.height <= b.width * b.height ? a : b));
+const last = bags.reduce((a, b) => (a.width * a.height >= b.width * b.height ? a : b));
+---
+
+<ArticlePage guide={PILLAR}>
+  <p class="answer"><strong>Kısa cevap:</strong> Hava kanallı ambalaj (airpack), birbirinden bağımsız hava sütunlarından oluşan şişirilebilir bir koruyucu ambalajdır. Ürün poşetin içine yerleştirilip şişirildiğinde hava sütunları ürünü her yönden sarar ve kargodaki darbe, sarsıntı ve ezilmelere karşı tampon görevi görür. Cam şişe, kavanoz, kozmetik ve elektronik ürünlerin gönderiminde kullanılır.</p>
+
+  <h2>Hava kanallı ambalaj nasıl çalışır?</h2>
+  <p>Airpack, iki kat plastik filmin belirli aralıklarla birleştirilmesiyle oluşan hava kanallarından meydana gelir. Kanallar tek bir giriş noktasından şişirilir; her kanalın girişindeki tek yönlü (ters) valf, havanın geri kaçmasını önler. Kanallar birbirinden bağımsız olduğu için bir kanal delinse bile diğerleri dolu kalır ve ürün korunmaya devam eder.</p>
+  <p>Şişirilen kanallar ürünün şeklini alır ve ürün ile koli duvarı arasında esnek bir hava yastığı oluşturur. Darbe anında enerji hava sütunlarına dağılır, doğrudan ürüne iletilmez.</p>
+
+  <h2>Neden tercih edilir?</h2>
+  <ul>
+    <li><strong>Düzenli koruma:</strong> Ürünü her yönden saran hava sütunları köşe ve kenar darbelerine karşı tampon oluşturur.</li>
+    <li><strong>Hızlı paketleme:</strong> Ürün poşete konur ve şişirilir; ayrıca sarma, bantlama ya da dolgu malzemesiyle uğraşmak gerekmez.</li>
+    <li><strong>Az depo alanı:</strong> Poşetler sönük (düz) halde saklanır, ihtiyaç anında şişirilir.</li>
+    <li><strong>Hafiflik:</strong> Hacminin neredeyse tamamı hava olduğundan paketin ağırlığını belirgin şekilde artırmaz.</li>
+    <li><strong>Özenli görünüm:</strong> Şeffaf yapısı sayesinde ürün kutudan düzenli ve korunaklı bir şekilde çıkar.</li>
+  </ul>
+
+  <h2>Hava kanallı ambalaj ile balonlu naylon arasındaki fark</h2>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th scope="col">Özellik</th><th scope="col">Hava kanallı ambalaj</th><th scope="col">Balonlu naylon</th></tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">Koruma şekli</th><td>Ürünü saran bağımsız hava sütunları</td><td>Küçük hava kabarcıkları; ürünü birkaç kat sarmak gerekir</td></tr>
+        <tr><th scope="row">Paketleme</th><td>Poşete koy, şişir</td><td>Kes, sar, bantla</td></tr>
+        <tr><th scope="row">Depolama</th><td>Sönük halde düz durur, az yer kaplar</td><td>Kabarcıklar şişkin olduğundan hacimli</td></tr>
+        <tr><th scope="row">Delinme durumu</th><td>Bir kanal delinse de diğerleri korumaya devam eder</td><td>Patlayan kabarcıkların koruması kaybolur</td></tr>
+        <tr><th scope="row">Uygun olduğu ürünler</th><td>Cam şişe, kavanoz, kozmetik, elektronik</td><td>Genel amaçlı sarma, hafif ürünler</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Türleri: hazır poşet ve rulo</h2>
+  <h3>Hazır airpack poşet</h3>
+  <p>Belirli ebatlarda üretilmiş poşetlerdir. Ürün poşete yerleştirilir ve şişirilir; aynı ürünü düzenli gönderen işletmeler için en hızlı yöntemdir. Kataloğumuzda {first.width}×{first.height} cm’den {last.width}×{last.height} cm’e kadar {bags.length} ebat bulunur: <a href="/kategori/hazir-paketler/">hazır airpack poşet modelleri</a>.</p>
+  <h3>Hava kanallı rulo</h3>
+  <p>İstediğiniz uzunlukta kesilerek kullanılır. Farklı boyutlarda çok sayıda ürün gönderenler, büyük ürünler ve koli içi boşluk doldurma için uygundur. {rolls.length} farklı rulo yüksekliği metre fiyatıyla sunulur: <a href="/kategori/rulo-paketler/">hava kanallı rulo modelleri</a>.</p>
+
+  <h2>Doğru ebat nasıl seçilir?</h2>
+  <ol>
+    <li>Ürününüzün enini, boyunu ve kalınlığını (ya da çapını) ölçün; kapak ve tutma yeri gibi çıkıntıları da hesaba katın.</li>
+    <li>Hava kanalları şişirildiğinde poşetin iç hacmi daralır; bu yüzden ürününüzden bir miktar büyük ebat seçin.</li>
+    <li>Tüm ebatları ve fiyatları <a href="/airpack-olcu-rehberi/">Airpack Ölçü Rehberi</a> tablosunda karşılaştırın.</li>
+    <li>Emin değilseniz ürün ölçünüzü ya da fotoğrafını WhatsApp’tan gönderin; uygun ebadı birlikte belirleyelim.</li>
+  </ol>
+
+  <h2>Nasıl kullanılır?</h2>
+  <p>Ürünü sönük poşete yerleştirin, valf girişinden el pompası ya da kompresörle şişirin ve koliye yerleştirin. Doğru şişirme seviyesi ve sık yapılan hatalar için <a href="/airpack-nasil-sisirilir/">Airpack nasıl şişirilir?</a> rehberine bakın.</p>
+
+  <h2>Hangi ürünler için kullanılır?</h2>
+  <p>Kırılabilir ya da darbeye hassas hemen her ürün için kullanılabilir. Şişe, kavanoz, kozmetik ve elektronik gibi ürün gruplarına göre hazırladığımız paketleme rehberlerini sayfanın sonunda bulabilirsiniz. Ürününüze tam uyan bir ebat yoksa ya da paketlerinizde logonuzun görünmesini istiyorsanız <a href="/ozel-uretim-logolu-airpack/">özel üretim ve logolu airpack</a> seçeneğine göz atın.</p>
+
+  <h2>Sipariş bilgileri</h2>
+  <p>Hazır poşetler {MIN_QTY}’li paketler halinde adet fiyatıyla, rulolar metre fiyatıyla satılır; en az {MIN_QTY} adet ya da {MIN_QTY} metre sipariş verilir. {formatNumber(BULK_MIN_QTY)} adet ve üzeri poşet siparişlerinde birim fiyattan {formatTRY(BULK_DISCOUNT)} iskonto uygulanır. Ödeme, kargo ve iade ile ilgili tüm sorular için <a href="/sikca-sorulan-sorular/">sıkça sorulan sorular</a> sayfasına bakabilirsiniz.</p>
+</ArticlePage>

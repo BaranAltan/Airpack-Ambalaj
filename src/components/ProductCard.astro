@@ -1,0 +1,221 @@
+---
+import { Image } from 'astro:assets';
+import { isOnSale, isRoll, productUrl, type Product } from '../data/products';
+import { MIN_QTY, formatTRY } from '../lib/pricing';
+import { productThumb } from '../lib/thumb';
+
+interface Props {
+  product: Product;
+  /** İlk görünen kartlar için görsel beklemeden yüklenir. */
+  eager?: boolean;
+  /** Sayfanın en büyük görseli (LCP) — yalnızca ilk karta verilir. */
+  priority?: boolean;
+  /** Kartın bulunduğu ızgaraya göre görsel genişliği */
+  sizes?: string;
+}
+
+const {
+  product,
+  eager = false,
+  priority = false,
+  sizes = '(min-width: 1240px) 380px, (min-width: 769px) 31vw, (min-width: 481px) 50vw, 100vw',
+} = Astro.props;
+const url = productUrl(product);
+const thumb = await productThumb(product);
+---
+
+<article class="product-card">
+  <a href={url} class="media" tabindex="-1" aria-hidden="true">
+    <Image
+      src={product.image}
+      alt={product.imageAlt}
+      widths={[200, 280, 380, 560, 760]}
+      sizes={sizes}
+      loading={eager || priority ? 'eager' : 'lazy'}
+      fetchpriority={priority ? 'high' : 'auto'}
+    />
+    {isOnSale(product) && <span class="sale">İndirim!</span>}
+  </a>
+  <div class="content">
+    <a href={`/kategori/${product.category.slug}/`} class="cat">{product.category.name}</a>
+    <h3 class="name"><a href={url}>{product.name}</a></h3>
+    <div class="bottom">
+      <div class="price">
+        {isOnSale(product) && <del>{formatTRY(product.regularPrice)}</del>}
+        <strong>{formatTRY(product.price)}{isRoll(product) && <small> / metre</small>}</strong>
+      </div>
+      <button
+        type="button"
+        class="add-btn"
+        data-add-to-cart
+        data-slug={product.slug}
+        data-name={product.name}
+        data-price={product.price}
+        data-thumb={thumb}
+        data-qty={MIN_QTY}
+        data-unit={product.unit}
+        aria-label={`${product.name} – sepete ekle`}
+      >
+        Sepete Ekle
+      </button>
+    </div>
+  </div>
+</article>
+
+<style>
+  .product-card {
+    background-color: var(--bg-card);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-normal);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    container-type: inline-size;
+  }
+
+  .product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-light);
+  }
+
+  .media {
+    position: relative;
+    display: block;
+    aspect-ratio: 1147 / 1536;
+    background-color: #f1f5f9;
+    overflow: hidden;
+  }
+
+  .media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .sale {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background-color: var(--danger);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .content {
+    padding: 24px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cat {
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-bottom: 8px;
+  }
+
+  .name {
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    margin-bottom: auto;
+  }
+
+  .name a {
+    display: block;
+  }
+
+  .name a:hover {
+    color: var(--primary);
+  }
+
+  .bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 20px;
+  }
+
+  .price {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+  }
+
+  .price strong {
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  .price small {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .price del {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .add-btn {
+    padding: 8px 16px;
+    border-radius: 99px;
+    background-color: var(--primary);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.6;
+    white-space: nowrap;
+    transition: background-color var(--transition-fast);
+  }
+
+  .add-btn:hover {
+    background-color: var(--primary-hover);
+  }
+
+  /* Dokunmatik ekranlarda en az 44px dokunma alanı */
+  @media (pointer: coarse) {
+    .add-btn {
+      min-height: 44px;
+    }
+  }
+
+  /* Dar kart (mobilde 2 kolonlu mağaza ızgarası): kompakt düzen */
+  @container (max-width: 260px) {
+    .content {
+      padding: 12px;
+    }
+
+    .cat {
+      font-size: 11.5px;
+      margin-bottom: 4px;
+    }
+
+    .name {
+      font-size: 15px;
+    }
+
+    .bottom {
+      flex-direction: column;
+      align-items: stretch;
+      margin-top: 12px;
+    }
+
+    .add-btn {
+      font-size: 13px;
+      padding: 6px 12px;
+    }
+  }
+</style>

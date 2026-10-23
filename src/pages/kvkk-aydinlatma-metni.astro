@@ -1,0 +1,84 @@
+---
+import LegalPage from '../components/LegalPage.astro';
+import SellerInfo from '../components/SellerInfo.astro';
+import { sellerName } from '../data/legal';
+import { SITE } from '../data/site';
+---
+
+<LegalPage
+  title="KVKK Aydınlatma Metni"
+  description="Airpack Ambalaj kişisel verilerin korunması aydınlatma metni: hangi verilerin hangi amaçla işlendiği, aktarıldığı ve KVKK kapsamındaki haklarınız."
+  lead="Kişisel verilerin işlenmesine ilişkin aydınlatma metni"
+>
+  <p>
+    {sellerName} olarak, 6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) kapsamında veri sorumlusu sıfatıyla
+    kişisel verilerinizi aşağıda açıklanan şekilde işlemekteyiz.
+  </p>
+
+  <h2>Veri sorumlusu</h2>
+  <SellerInfo />
+
+  <h2>İşlenen kişisel veriler</h2>
+  <ul>
+    <li><strong>Kimlik:</strong> ad, soyad.</li>
+    <li><strong>İletişim:</strong> telefon numarası, e-posta adresi, teslimat adresi.</li>
+    <li><strong>Müşteri işlem:</strong> sipariş edilen ürünler, miktarlar, sipariş tutarı, sipariş numarası ve tarihi, yazışma içerikleri.</li>
+    <li><strong>Finans ve vergi (isteğe bağlı):</strong> firma adı, vergi dairesi ve vergi numarası; ödeme ve iade için banka hesap bilgisi.</li>
+  </ul>
+
+  <h2>Verilerin toplanma yöntemi</h2>
+  <ul>
+    <li>
+      Ödeme sayfasındaki form doldurulduğunda bilgiler web sitesi sunucusunda saklanmaz; sipariş mesajı olarak tarafımıza
+      WhatsApp üzerinden iletilir.
+    </li>
+    <li>İletişim formu, WhatsApp, telefon ve e-posta yoluyla bizimle paylaştığınız bilgiler.</li>
+    <li>
+      Alışveriş sepetiniz yalnızca tarayıcınızın yerel depolama alanında tutulur ve bize gönderilmez. Sitede reklam veya
+      analiz amaçlı çerez kullanılmamaktadır.
+    </li>
+  </ul>
+
+  <h2>İşleme amaçları ve hukuki sebepler</h2>
+  <ul>
+    <li>Siparişin alınması, ödemenin teyidi, ürünlerin hazırlanması ve teslimi (KVKK m.5/2-c: sözleşmenin kurulması ve ifası).</li>
+    <li>Fatura düzenlenmesi, muhasebe ve yasal saklama yükümlülükleri (KVKK m.5/2-ç: hukuki yükümlülük).</li>
+    <li>Soru, talep, iade ve şikâyetlerin yanıtlanması; müşteri ilişkilerinin yürütülmesi (KVKK m.5/2-f: meşru menfaat).</li>
+  </ul>
+
+  <h2>Kişisel verilerin aktarılması</h2>
+  <ul>
+    <li>Teslimat için kargo firmalarına (ad, soyad, adres, telefon).</li>
+    <li>Fatura ve muhasebe işlemleri için mali müşavir ve ilgili yazılım hizmet sağlayıcılarına.</li>
+    <li>Ödeme ve iade işlemleri için bankalara.</li>
+    <li>Talep edilmesi halinde yetkili kamu kurum ve kuruluşlarına.</li>
+    <li>
+      Sipariş ve yazışmaların WhatsApp üzerinden yürütülmesi nedeniyle, hizmet sağlayıcının (Meta Platforms) yurt dışındaki
+      sunucularına; bu aktarım KVKK’nın 9. maddesine uygun olarak gerçekleştirilir.
+    </li>
+  </ul>
+
+  <h2>Saklama süresi</h2>
+  <p>
+    Kişisel verileriniz işleme amacının gerektirdiği süre boyunca ve ilgili mevzuatta öngörülen süreler (ör. fatura ve
+    muhasebe kayıtları için 10 yıl) kadar saklanır; süre sonunda silinir, yok edilir veya anonim hale getirilir.
+  </p>
+
+  <h2>KVKK kapsamındaki haklarınız</h2>
+  <p>KVKK’nın 11. maddesi uyarınca;</p>
+  <ul>
+    <li>kişisel verilerinizin işlenip işlenmediğini öğrenme ve işlenmişse buna ilişkin bilgi talep etme,</li>
+    <li>işlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme,</li>
+    <li>yurt içinde veya yurt dışında aktarıldığı üçüncü kişileri bilme,</li>
+    <li>eksik veya yanlış işlenmişse düzeltilmesini, şartları oluştuğunda silinmesini veya yok edilmesini isteme ve bu işlemlerin aktarılan üçüncü kişilere bildirilmesini talep etme,</li>
+    <li>münhasıran otomatik sistemlerle analiz edilmesi sonucu aleyhinize bir sonucun ortaya çıkmasına itiraz etme,</li>
+    <li>kanuna aykırı işlenmesi sebebiyle zarara uğramanız halinde zararın giderilmesini talep etme</li>
+  </ul>
+  <p>haklarına sahipsiniz.</p>
+
+  <h2>Başvuru</h2>
+  <p>
+    Haklarınıza ilişkin taleplerinizi <a href={`mailto:${SITE.email}`}>{SITE.email}</a> adresine e-posta ile ya da yukarıdaki
+    adrese yazılı olarak iletebilirsiniz. Başvurularınız en geç 30 gün içinde ücretsiz olarak sonuçlandırılır.
+  </p>
+</LegalPage>

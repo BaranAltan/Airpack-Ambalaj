@@ -1,0 +1,26 @@
+---
+// Yasal metinlerde satıcı / veri sorumlusu bilgileri. Boş alanlar gösterilmez (src/data/legal.ts).
+import { LEGAL, sellerAddress, sellerName } from '../data/legal';
+import { SITE } from '../data/site';
+
+const rows = [
+  ['Ünvan', sellerName],
+  ['Adres', sellerAddress],
+  ['Telefon', SITE.phone],
+  ['E-posta', SITE.email],
+  ['KEP adresi', LEGAL.kep],
+  ['Vergi dairesi / No', [LEGAL.taxOffice, LEGAL.taxNumber].filter(Boolean).join(' / ')],
+  ['MERSİS No', LEGAL.mersis],
+].filter(([, value]) => value);
+---
+
+<dl>
+  {
+    rows.map(([label, value]) => (
+      <>
+        <dt>{label}</dt>
+        <dd>{value}</dd>
+      </>
+    ))
+  }
+</dl>

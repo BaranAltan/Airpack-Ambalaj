@@ -1,0 +1,100 @@
+---
+// Mağaza ve kategori sayfalarının 1. sayfasında, ürün listesinin altında gösterilen tanıtım metni.
+import { bags, products } from '../data/products';
+import { BULK_DISCOUNT, BULK_MIN_QTY, MIN_QTY, SHIPPING_FEE, formatNumber, formatTRY } from '../lib/pricing';
+
+interface Props {
+  kind: 'magaza' | 'hazir-paketler' | 'rulo-paketler';
+}
+
+const { kind } = Astro.props;
+const rolls = products.filter((p) => p.unit === 'metre');
+const first = bags.reduce((a, b) => (a.width * a.height <= b.width * b.height ? a : b));
+const last = bags.reduce((a, b) => (a.width * a.height >= b.width * b.height ? a : b));
+const cm = (n: number) => `${String(n).replace('.', ',')} cm`;
+const rollRange = `${cm(Math.min(...rolls.map((r) => r.width)))}’den ${cm(Math.max(...rolls.map((r) => r.width)))}’e`;
+---
+
+<section class="shop-about">
+  {
+    kind === 'magaza' && (
+      <>
+        <h2>Airpack Poşet ve Hava Kanallı Rulo Fiyatları</h2>
+        <p>Mağazamızda iki ürün grubu bulunur: belirli ebatlarda hazır üretilmiş <a href="/kategori/hazir-paketler/">airpack poşetler</a> ve istenilen uzunlukta kesilebilen <a href="/kategori/rulo-paketler/">hava kanallı rulolar</a>. Hazır poşetler {MIN_QTY}’li paketler halinde adet fiyatıyla, rulolar metre fiyatıyla satılır. {formatNumber(BULK_MIN_QTY)} adet ve üzeri poşet siparişlerinde birim fiyattan {formatTRY(BULK_DISCOUNT)} iskonto sepette otomatik uygulanır; kargo ücreti sipariş başına {formatTRY(SHIPPING_FEE)}’dir.</p>
+        <p>Ürününüz için hangi ebadın uygun olduğunu bilmiyorsanız <a href="/airpack-olcu-rehberi/">Airpack Ölçü Rehberi</a>’ndeki tabloyu inceleyebilir, ürün grubuna göre paketleme önerileri için <a href="/hava-kanalli-ambalaj/">ambalaj rehberimize</a> göz atabilirsiniz.</p>
+      </>
+    )
+  }
+  {
+    kind === 'hazir-paketler' && (
+      <>
+        <h2>Hazır Airpack Poşet Nedir?</h2>
+        <p>Hazır airpack poşetler, bağımsız hava kanallarından oluşan ve ürünün içine yerleştirilip şişirildiği koruyucu kargo poşetleridir. Şişirildiğinde ürünün etrafını saran hava sütunları, taşıma sırasındaki darbe ve ezilmelere karşı tampon görevi görür. Cam şişe, kavanoz, kozmetik ve elektronik gibi kırılabilir ürünleri hızlı ve düzenli şekilde paketlemenizi sağlar.</p>
+        <h3>Ebat seçimi</h3>
+        <p>Kataloğumuzda {first.width}×{first.height} cm’den {last.width}×{last.height} cm’e kadar {bags.length} hazır ebat bulunur. Hava kanalları şişirildiğinde poşetin iç hacmi daraldığı için ürününüzden bir miktar büyük ebat seçmeniz gerekir. Doğru ebadı bulmak için <a href="/airpack-olcu-rehberi/">Airpack Ölçü Rehberi</a>’ne bakabilir ya da ürün ölçünüzü WhatsApp’tan gönderebilirsiniz.</p>
+        <h3>Sipariş ve fiyatlar</h3>
+        <p>Poşetler {MIN_QTY}’li paketler halinde, adet fiyatıyla satılır. {formatNumber(BULK_MIN_QTY)} adet ve üzeri siparişlerde birim fiyattan {formatTRY(BULK_DISCOUNT)} iskonto otomatik uygulanır. Farklı boyutlarda çok sayıda ürün gönderiyorsanız <a href="/kategori/rulo-paketler/">hava kanallı rulolar</a> da işinize yarayabilir.</p>
+      </>
+    )
+  }
+  {
+    kind === 'rulo-paketler' && (
+      <>
+        <h2>Hava Kanallı Rulo ile Esnek Paketleme</h2>
+        <p>Hava kanallı rulolar, istediğiniz uzunlukta kesilerek kullanılan şişirilebilir koruyucu ambalajlardır. Farklı boyutlarda çok sayıda ürün gönderen işletmeler, tek tip ruloyla her ürüne uygun uzunlukta koruma hazırlayabilir. Ürünü sarmak, köşe ve kenarları korumak ya da koli içindeki boşlukları doldurmak için kullanılır.</p>
+        <h3>Rulo yüksekliği seçimi</h3>
+        <p>Rulolarımız {rollRange} kadar {rolls.length} farklı yükseklikte sunulur. Yükseklik, ürününüzü saracağınız yüzeyin genişliğine göre seçilir; geniş ve büyük ürünler için yüksek rulolar daha uygundur. Kararsızsanız ürün ölçünüzü WhatsApp’tan gönderin.</p>
+        <h3>Metreyle satış</h3>
+        <p>Rulolar metre fiyatıyla satılır; en az {MIN_QTY} metre, {MIN_QTY} metrenin katları halinde sipariş verilir. Sönük halde gönderildiği için deponuzda az yer kaplar. Aynı ürünü düzenli gönderiyorsanız <a href="/kategori/hazir-paketler/">hazır airpack poşetler</a> daha hızlı bir paketleme sağlar.</p>
+      </>
+    )
+  }
+</section>
+
+<style>
+  .shop-about {
+    margin-top: 3rem;
+    padding: 2rem;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    background: var(--bg-card);
+    color: #334155;
+    font-size: 0.95rem;
+    line-height: 1.75;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+    color: var(--text-main);
+    margin-bottom: 0.75rem;
+  }
+
+  h3 {
+    font-size: 1.02rem;
+    color: var(--text-main);
+    margin: 1.25rem 0 0.4rem;
+  }
+
+  p {
+    margin-bottom: 0.75rem;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+
+  a {
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 600px) {
+    .shop-about {
+      padding: 1.5rem 1.25rem;
+    }
+  }
+</style>

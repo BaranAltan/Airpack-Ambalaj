@@ -1,0 +1,38 @@
+---
+import LegalPage from '../components/LegalPage.astro';
+import { FREE_SHIPPING_MIN, SHIPPING_FEE, formatTRY } from '../lib/pricing';
+---
+
+<LegalPage
+  title="Kargo ve Teslimat"
+  description={`Airpack Ambalaj kargo ve teslimat bilgileri: Türkiye geneline gönderim, sipariş başına ${formatTRY(SHIPPING_FEE)} kargo ücreti, teslimat süreci ve hasarlı paket kontrolü.`}
+  lead="Gönderim, kargo ücreti ve teslimat süreci"
+>
+  <h2>Kargo ücreti</h2>
+  <p>
+    Kargo ücreti sipariş başına <strong>{formatTRY(SHIPPING_FEE)}</strong>’dir ve ödeme sayfasındaki sipariş özetinde
+    gösterilir.{FREE_SHIPPING_MIN !== null && ` ${formatTRY(FREE_SHIPPING_MIN)} ve üzeri siparişlerde kargo ücretsizdir.`}
+  </p>
+
+  <h2>Gönderim bölgesi</h2>
+  <p>Siparişler Türkiye’nin tüm illerine anlaşmalı kargo firması ile gönderilir.</p>
+
+  <h2>Teslimat süreci</h2>
+  <ol>
+    <li>Siparişinizi oluşturduğunuzda sipariş özeti WhatsApp üzerinden bize iletilir ve size banka hesap (IBAN) bilgisi gönderilir.</li>
+    <li>Ödemeniz hesabımıza ulaştığında siparişiniz onaylanır ve hazırlanmaya başlar.</li>
+    <li>Kargoya verilen siparişin takip numarası size WhatsApp üzerinden iletilir.</li>
+    <li>Teslimat, ödeme onayından itibaren yasal süre olan 30 günü aşmamak kaydıyla tamamlanır. Tahmini kargoya teslim süresi sipariş onayında bildirilir.</li>
+  </ol>
+
+  <h2>Teslim alırken</h2>
+  <ul>
+    <li>Paketi kargo görevlisinin yanında kontrol edin.</li>
+    <li>Hasarlı, ezik veya ıslanmış paketleri tutanak tutturarak teslim alın ya da teslim almayı reddedin ve bize bildirin.</li>
+    <li>Adreste bulunamamanız halinde kargo firmasının şubesinde bekletilen gönderinizi yasal bekleme süresi içinde teslim alabilirsiniz.</li>
+  </ul>
+
+  <p>
+    İade ve değişim için <a href="/iade-ve-cayma/">İade ve Cayma Hakkı</a> sayfasına, tüm koşullar için <a href="/mesafeli-satis-sozlesmesi/">Mesafeli Satış Sözleşmesi</a>’ne bakabilirsiniz.
+  </p>
+</LegalPage>

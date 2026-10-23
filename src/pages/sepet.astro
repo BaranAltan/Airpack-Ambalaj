@@ -1,0 +1,508 @@
+---
+import Icon from '../components/Icon.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../data/site';
+---
+
+<BaseLayout title="Sepet" description="Airpack Ambalaj alışveriş sepetiniz." noindex>
+  <section class="cart-page">
+    <div class="container">
+      <a href="/magaza/" class="back"><Icon name="arrow-left" /> Alışverişe Dön</a>
+      <h1>Alışveriş Sepeti</h1>
+
+      <div class="empty" data-empty>
+        <span class="empty-icon"><Icon name="trash-2" /></span>
+        <h2>Sepetiniz şu an boş.</h2>
+        <p>İhtiyacınız olan hava kanallı ambalaj çözümlerini keşfetmek için ürünlerimize göz atın.</p>
+        <a href="/magaza/" class="btn btn-primary big">Ürünleri İncele</a>
+      </div>
+
+      <div class="grid" data-filled hidden>
+        <div class="left">
+          <ul class="items" data-list></ul>
+
+          <div class="trust">
+            <div class="trust-card">
+              <span class="t-icon green"><Icon name="shield" /></span>
+              <div>
+                <h3>Güvenli Alışveriş</h3>
+                <p>256-bit SSL şifreleme</p>
+              </div>
+            </div>
+            <div class="trust-card">
+              <span class="t-icon blue"><Icon name="truck" /></span>
+              <div>
+                <h3>Hızlı Teslimat</h3>
+                <p>Aynı gün kargolama</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="summary" aria-labelledby="sum-title">
+          <h2 id="sum-title">Sipariş Özeti</h2>
+          <div class="rows">
+            <div><span>Ara Toplam (<span data-count></span> Ürün)</span><span data-subtotal></span></div>
+            <div><span>Kargo Tutarı</span><span data-shipping></span></div>
+          </div>
+          <div class="grand">
+            <span>Genel Toplam</span>
+            <strong data-total></strong>
+          </div>
+          <a href="/odeme/" class="btn btn-primary btn-block go">Siparişi Tamamla <Icon name="arrow-right" /></a>
+          <p class="support">Müşteri Hizmetleri: <a href={SITE.phoneHref}>{SITE.phone}</a></p>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <template id="tpl-cart-line">
+    <li class="row">
+      <a data-link class="row-img" tabindex="-1"><img data-thumb alt="" width="100" height="100" /></a>
+      <div class="row-details">
+        <div class="row-header">
+          <div>
+            <a data-link class="row-title" data-name></a>
+          </div>
+          <div class="row-pricing">
+            <strong data-total></strong>
+            <span data-unit></span>
+          </div>
+        </div>
+        <div class="bulk-box" data-bulk-box>
+          <span class="badge-applied" data-bulk-yes>✓ 1.000+ Adet Al İskontosu Uygulandı (-₺0,20/ad.)</span>
+          <span class="badge-hint" data-bulk-no>
+            <span>💡 1.000 adet al iskontolu fiyattan yararlan</span>
+            <button type="button" data-action="bulk">1.000 Adet Yap</button>
+          </span>
+        </div>
+        <div class="row-footer">
+          <div class="qty">
+            <button type="button" data-action="dec" aria-label="Azalt">−</button>
+            <input type="number" min="50" step="50" inputmode="numeric" data-qty />
+            <button type="button" data-action="inc" aria-label="Artır">+</button>
+          </div>
+          <button type="button" class="remove" data-action="remove"><Icon name="trash-2" /> Kaldır</button>
+        </div>
+      </div>
+    </li>
+  </template>
+</BaseLayout>
+
+<script>
+  import { formatNumber, formatTRY } from '../lib/pricing';
+  import { cart } from '../scripts/cart';
+  import { bindLineEvents, renderLines } from '../scripts/cart-ui';
+
+  const list = document.querySelector<HTMLElement>('[data-list]')!;
+  const $ = (sel: string) => document.querySelector<HTMLElement>(sel)!;
+
+  const render = () => {
+    const has = cart.items().length > 0;
+    $('[data-empty]').hidden = has;
+    $('[data-filled]').hidden = !has;
+    if (!has) return;
+    renderLines(list, 'tpl-cart-line');
+    const { subtotal, shipping, total } = cart.totals();
+    $('[data-count]').textContent = formatNumber(cart.count());
+    $('[data-subtotal]').textContent = formatTRY(subtotal);
+    $('[data-shipping]').textContent = shipping === 0 ? 'Ücretsiz' : formatTRY(shipping);
+    $('.summary [data-total]').textContent = formatTRY(total);
+  };
+
+  render();
+  cart.onChange(render);
+  bindLineEvents(list);
+</script>
+
+<style>
+  .cart-page {
+    padding: 2rem 0 4rem;
+    background-color: var(--bg-color);
+  }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .back:hover {
+    color: var(--primary);
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    margin: 1.5rem 0 2rem;
+  }
+
+  .empty {
+    background-color: #fff;
+    border-radius: 16px;
+    padding: 4rem 2rem;
+    text-align: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  }
+
+  .empty-icon {
+    width: 80px;
+    height: 80px;
+    background-color: var(--primary-soft);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: var(--primary);
+    font-size: 2rem;
+  }
+
+  .empty h2 {
+    font-size: 1.5rem;
+  }
+
+  .empty p {
+    margin-bottom: 2rem;
+  }
+
+  .big {
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .left {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .items {
+    background-color: #fff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  }
+
+  .row {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+    align-items: center;
+  }
+
+  .row:first-child {
+    padding-top: 0;
+  }
+
+  .row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .row-img {
+    width: 100px;
+    height: 100px;
+    background-color: #f1f5f9;
+    border-radius: 12px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .row-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .row-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .row-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .row-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .row-title:hover {
+    color: var(--primary);
+  }
+
+  .row-pricing {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+  }
+
+  .row-pricing strong {
+    font-weight: 800;
+    font-size: 1.15rem;
+  }
+
+  .row-pricing span {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+
+  .bulk-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .badge-applied {
+    color: #15803d;
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .badge-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .badge-hint > span {
+    color: #2563eb;
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .badge-hint button {
+    color: var(--primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-decoration: underline;
+    padding: 0 4px;
+  }
+
+  .row-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.75rem;
+  }
+
+  .qty {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-color);
+    overflow: hidden;
+  }
+
+  .qty button {
+    padding: 0.5rem 1rem;
+    transition: background-color 0.2s;
+  }
+
+  .qty button:hover {
+    background-color: #f1f5f9;
+  }
+
+  .qty input {
+    width: 70px;
+    text-align: center;
+    border: none;
+    background: transparent;
+    font-size: 0.95rem;
+    font-weight: 600;
+    outline: none;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  .qty input::-webkit-inner-spin-button,
+  .qty input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+  }
+
+  .remove {
+    color: var(--danger);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+
+  .remove:hover {
+    background-color: #fee2e2;
+  }
+
+  .trust {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .trust-card {
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  }
+
+  .t-icon {
+    padding: 0.75rem;
+    border-radius: 50%;
+    display: flex;
+    font-size: 1.4rem;
+  }
+
+  .t-icon.green {
+    background: #ecfdf5;
+    color: #10b981;
+  }
+
+  .t-icon.blue {
+    background: #eff6ff;
+    color: #2563eb;
+  }
+
+  .trust-card h3 {
+    margin: 0 0 0.25rem;
+    font-size: 0.95rem;
+  }
+
+  .trust-card p {
+    margin: 0;
+    font-size: 0.8rem;
+  }
+
+  .summary {
+    background-color: #fff;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: calc(var(--header-height) + 2rem);
+  }
+
+  .summary h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+  }
+
+  .rows {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-muted);
+  }
+
+  .rows > div {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .grand {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.5rem;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .grand strong {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary);
+  }
+
+  .go {
+    padding: 1rem;
+    font-size: 1.1rem;
+  }
+
+  .support {
+    margin: 1.5rem 0 0;
+    text-align: center;
+    font-size: 0.85rem;
+  }
+
+  .support a {
+    color: var(--text-main);
+    font-weight: 700;
+  }
+
+  @media (max-width: 992px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .summary {
+      position: static;
+    }
+  }
+
+  @media (max-width: 600px) {
+    h1 {
+      font-size: 2rem;
+    }
+
+    .items {
+      padding: 1rem;
+    }
+
+    .row {
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .row-img {
+      width: 72px;
+      height: 72px;
+    }
+
+    .row-pricing {
+      text-align: left;
+    }
+
+    .trust {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

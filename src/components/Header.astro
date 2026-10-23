@@ -1,0 +1,285 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/site/logo.png';
+import { NAV, SITE } from '../data/site';
+import Icon from './Icon.astro';
+
+const path = Astro.url.pathname.replace(/\/?$/, '/');
+const isActive = (href: string) =>
+  href === '/' ? path === '/' : path.startsWith(href) || (href === '/magaza/' && /^\/(urun|kategori)\//.test(path));
+---
+
+<header class="site-header" data-header>
+  <div class="container inner">
+    <a href="/" class="brand" aria-label="Airpack Ambalaj – Ana sayfa">
+      <Image src={logo} alt="Airpack Ambalaj" width={132} height={46} densities={[1, 2]} loading="eager" />
+    </a>
+
+    <nav class="desktop-nav" aria-label="Ana menü">
+      <ul>
+        {
+          NAV.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="actions">
+      <button type="button" class="cart-btn" data-open-cart aria-label="Sepeti aç">
+        <Icon name="shopping-cart" />
+        <span class="cart-count" data-cart-count hidden>0</span>
+      </button>
+      <button type="button" class="menu-btn" aria-expanded="false" aria-controls="mobile-menu" data-menu-open>
+        <span class="sr-only">Menüyü aç</span>
+        <Icon name="menu" />
+      </button>
+    </div>
+  </div>
+
+  <div class="mobile-menu" id="mobile-menu" data-mobile-menu>
+    <div class="mm-head">
+      <span>Menü</span>
+      <button type="button" class="mm-close" data-menu-close aria-label="Menüyü kapat"><Icon name="x" /></button>
+    </div>
+    <nav class="mm-nav" aria-label="Mobil menü">
+      {
+        NAV.map((item) => (
+          <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+            {item.label}
+          </a>
+        ))
+      }
+      <a href="/airpack-olcu-rehberi/">Ölçü Rehberi</a>
+    </nav>
+    <div class="mm-foot">
+      <Image src={logo} alt="" width={110} height={38} densities={[1, 2]} />
+      <p>Endüstriyel ambalaj ve paketleme çözümlerinde güvenilir, kaliteli ve yenilikçi iş ortağınız.</p>
+      <a href={SITE.phoneHref} class="mm-phone"><Icon name="phone" /> {SITE.phone}</a>
+    </div>
+  </div>
+</header>
+
+<script>
+  import { cart, openCart } from '../scripts/cart';
+  import { formatNumber } from '../lib/pricing';
+
+  const header = document.querySelector<HTMLElement>('[data-header]')!;
+  const menu = header.querySelector<HTMLElement>('[data-mobile-menu]')!;
+  const openBtn = header.querySelector<HTMLButtonElement>('[data-menu-open]')!;
+
+  const setMenu = (open: boolean) => {
+    menu.classList.toggle('open', open);
+    openBtn.setAttribute('aria-expanded', String(open));
+    document.documentElement.classList.toggle('scroll-lock', open);
+  };
+  openBtn.addEventListener('click', () => setMenu(true));
+  header.querySelector('[data-menu-close]')!.addEventListener('click', () => setMenu(false));
+  document.addEventListener('keydown', (e) => e.key === 'Escape' && setMenu(false));
+
+  document.querySelectorAll('[data-open-cart]').forEach((btn) => btn.addEventListener('click', openCart));
+
+  const badge = header.querySelector<HTMLElement>('[data-cart-count]')!;
+  const renderCount = () => {
+    const count = cart.count();
+    badge.hidden = count === 0;
+    badge.textContent = formatNumber(count);
+    header.querySelector('[data-open-cart]')!.setAttribute('aria-label', count ? `Sepeti aç (${count} ürün)` : 'Sepeti aç');
+  };
+  renderCount();
+  cart.onChange(renderCount);
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.96);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+  }
+
+  .inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  .brand img {
+    width: 132px;
+    height: auto;
+  }
+
+  .desktop-nav ul {
+    display: flex;
+    gap: 2rem;
+    font-weight: 500;
+    align-items: center;
+  }
+
+  .desktop-nav a {
+    color: var(--text-main);
+  }
+
+  .desktop-nav a:hover,
+  .desktop-nav a[aria-current='page'] {
+    color: var(--primary);
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .cart-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    color: var(--text-main);
+    font-size: 1.3rem;
+    transition: color var(--transition-fast);
+  }
+
+  .cart-btn:hover {
+    color: var(--primary);
+  }
+
+  .cart-count {
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    min-width: 20px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background-color: var(--primary);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+    border: 2px solid #fff;
+    box-sizing: content-box;
+  }
+
+  .menu-btn {
+    display: none;
+    font-size: 1.5rem;
+    color: var(--text-main);
+  }
+
+  /* Mobil menü (orijinal tasarım: sağdan kayan tam ekran panel) */
+  .mobile-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-color);
+    transform: translateX(100%);
+    visibility: hidden;
+    transition:
+      transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      visibility 0.4s;
+  }
+
+  .mobile-menu.open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+
+  .mm-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.5rem;
+    height: var(--header-height);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--primary);
+  }
+
+  .mm-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: var(--border-color);
+    font-size: 1.4rem;
+    color: var(--text-main);
+  }
+
+  .mm-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 3rem 2rem;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .mm-nav a {
+    font-size: 1.6rem;
+    font-weight: 600;
+  }
+
+  .mm-nav a[aria-current='page'] {
+    color: var(--primary);
+  }
+
+  .mm-foot {
+    padding: 2rem;
+    background-color: var(--bg-card);
+    border-top: 1px solid var(--border-color);
+  }
+
+  .mm-foot p {
+    font-size: 0.9rem;
+    margin: 0.75rem 0;
+  }
+
+  .mm-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--primary);
+  }
+
+  @media (max-width: 767px) {
+    .desktop-nav {
+      display: none;
+    }
+
+    /* Simge 24px kalır; dokunma alanı 44px (negatif kenar boşluğuyla görünüm değişmez) */
+    .menu-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      margin: -10px -10px -10px 0;
+    }
+
+    .brand img {
+      width: 110px;
+    }
+  }
+</style>

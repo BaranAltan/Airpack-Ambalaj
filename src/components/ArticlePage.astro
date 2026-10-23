@@ -1,0 +1,174 @@
+---
+// Rehber / bilgi sayfaları: metin şablonu + Article schema + ilgili sayfalar + sipariş yönlendirmesi.
+import ProsePage from './ProsePage.astro';
+import Icon from './Icon.astro';
+import { SITE, whatsappLink } from '../data/site';
+import { absolute, breadcrumbLd, organizationId } from '../lib/seo';
+import { GUIDES, PILLAR, type Guide } from '../data/guides';
+import { guideOgSlug, ogPath } from '../lib/og';
+
+interface Props {
+  guide: Guide;
+}
+
+const { guide } = Astro.props;
+const isPillar = guide.path === PILLAR.path;
+const related = (guide.related ?? GUIDES.filter((g) => g.path !== guide.path).map((g) => g.path))
+  .map((path) => GUIDES.find((g) => g.path === path) ?? (path === PILLAR.path ? PILLAR : undefined))
+  .filter((g): g is Guide => !!g);
+
+const article = {
+  '@type': 'Article',
+  '@id': `${absolute(guide.path, Astro.site)}#article`,
+  headline: guide.title,
+  description: guide.description,
+  inLanguage: 'tr-TR',
+  datePublished: guide.published,
+  dateModified: guide.modified ?? guide.published,
+  author: { '@id': organizationId(Astro.site) },
+  publisher: { '@id': organizationId(Astro.site) },
+  mainEntityOfPage: absolute(guide.path, Astro.site),
+  image: absolute(ogPath(guideOgSlug(guide.path)), Astro.site),
+};
+const crumbs = breadcrumbLd(
+  [
+    { name: 'Ana Sayfa', path: '/' },
+    ...(isPillar ? [] : [{ name: PILLAR.menu, path: PILLAR.path }]),
+    { name: guide.menu, path: guide.path },
+  ],
+  Astro.site,
+);
+---
+
+<ProsePage
+  title={guide.title}
+  seoTitle={guide.seoTitle}
+  description={guide.description}
+  badge={isPillar ? 'Ambalaj Rehberi' : guide.badge ?? 'Ambalaj Rehberi'}
+  lead={guide.lead}
+  jsonLd={[crumbs, article]}
+  og={ogPath(guideOgSlug(guide.path))}
+>
+  <slot />
+
+  <div class="cta-box">
+    <div>
+      <strong>Ürününüz için doğru ambalajı birlikte seçelim</strong>
+      <p>Ürün ölçünüzü veya fotoğrafını gönderin, uygun ebadı söyleyelim. Numune gönderimi ücretsizdir.</p>
+    </div>
+    <div class="cta-actions">
+      <a href={whatsappLink(`Merhaba, ${guide.menu.toLocaleLowerCase('tr-TR')} için ambalaj önerisi almak istiyorum.`)} class="btn btn-primary" target="_blank" rel="noopener">
+        <Icon name="whatsapp" /> WhatsApp’tan Yazın
+      </a>
+      <a href="/magaza/" class="btn btn-outline">Ürünleri İncele</a>
+    </div>
+  </div>
+
+  <nav slot="after" class="related" aria-label="İlgili rehberler">
+    <h2>{isPillar ? 'Ürüne Göre Paketleme Rehberleri' : 'İlgili Rehberler'}</h2>
+    <ul>
+      {
+        related.map((g) => (
+          <li>
+            <a href={g.path}>
+              <strong>{g.menu}</strong>
+              <span>{g.summary}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="more">
+      Sorunuzun cevabını bulamadınız mı? <a href="/sikca-sorulan-sorular/">Sıkça sorulan sorulara</a> göz atın ya da {SITE.phone} numarasından bize ulaşın.
+    </p>
+  </nav>
+</ProsePage>
+
+<style>
+  .cta-box {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 1.5rem;
+    margin-top: 2.5rem;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid #bfdbfe;
+    border-radius: 16px;
+    background: #eff6ff;
+  }
+
+  .cta-box strong {
+    color: var(--text-main);
+  }
+
+  .cta-box p {
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+  }
+
+  .cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .cta-actions .btn {
+    color: #fff;
+  }
+
+  .cta-actions .btn-outline {
+    color: var(--primary);
+  }
+
+  .related {
+    margin-top: 2.5rem;
+  }
+
+  .related h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .related ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 0.9rem;
+  }
+
+  .related ul a {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    height: 100%;
+    padding: 1rem 1.15rem;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-card);
+    transition: border-color var(--transition-fast);
+  }
+
+  .related ul a:hover {
+    border-color: var(--primary);
+  }
+
+  .related strong {
+    color: var(--text-main);
+  }
+
+  .related span {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .more {
+    margin-top: 1.25rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  .more a {
+    color: var(--primary);
+    font-weight: 600;
+  }
+</style>

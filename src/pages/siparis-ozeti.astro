@@ -1,0 +1,312 @@
+---
+import Icon from '../components/Icon.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../data/site';
+---
+
+<BaseLayout title="Sipariş Özeti" description="Airpack Ambalaj sipariş özeti." noindex>
+  <section class="order">
+    <div class="container narrow">
+      <div class="none" data-none hidden>
+        <h1>Görüntülenecek sipariş bulunamadı</h1>
+        <p>Sipariş özeti yalnızca sipariş verdiğiniz tarayıcı oturumunda görüntülenir.</p>
+        <a href="/magaza/" class="btn btn-primary">Ürünleri İncele</a>
+      </div>
+
+      <div data-order hidden>
+        <div class="thanks">
+          <Icon name="check-circle" />
+          <h1>Teşekkür ederiz. Siparişiniz alınmıştır.</h1>
+        </div>
+
+        <ul class="meta">
+          <li>Sipariş Numarası:<strong data-o="no"></strong></li>
+          <li>Sipariş Tarihi:<strong data-o="date"></strong></li>
+          <li>Sipariş E-postası:<strong data-o="email"></strong></li>
+          <li>Sipariş Toplamı:<strong data-o="total"></strong></li>
+          <li>Ödeme Yöntemi:<strong>Havale / EFT</strong></li>
+        </ul>
+
+        <div class="wa-card">
+          <div>
+            <h2>Siparişinizi WhatsApp Üzerinden Tamamlayın</h2>
+            <p>
+              Sipariş detaylarınız hazırlandı. WhatsApp müşteri temsilcimize ileterek IBAN bilgisini alabilir ve ödemenizi
+              tamamlayabilirsiniz.
+            </p>
+          </div>
+          <a class="wa-btn" data-o="wa" target="_blank" rel="noopener"><Icon name="whatsapp" /> WhatsApp ile Siparişi Tamamla</a>
+        </div>
+
+        <div class="box">
+          <h2>Sipariş Detayları</h2>
+          <table>
+            <thead>
+              <tr><th scope="col">Ürün</th><th scope="col" class="r">Toplam</th></tr>
+            </thead>
+            <tbody data-o="rows"></tbody>
+            <tfoot>
+              <tr><th scope="row">Ara toplam:</th><td class="r" data-o="subtotal"></td></tr>
+              <tr><th scope="row">Kargo:</th><td class="r" data-o="shipping"></td></tr>
+              <tr class="sum"><th scope="row">Sipariş Toplamı:</th><td class="r" data-o="total"></td></tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="box">
+          <h2>Fatura Detayları</h2>
+          <address data-o="billing"></address>
+        </div>
+
+        <p class="note">{SITE.paymentNote}</p>
+
+        <div class="center">
+          <a href="/magaza/" class="btn btn-outline"><Icon name="arrow-left" /> Alışverişe Devam Et</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import { formatNumber, formatQuantity, formatTRY } from '../lib/pricing';
+
+  interface Order {
+    orderNo: string;
+    date: string;
+    waUrl: string;
+    customer: Record<string, string>;
+    items: { slug: string; name: string; quantity: number; unit?: 'adet' | 'metre'; total: number }[];
+    subtotal: number;
+    shipping: number;
+    total: number;
+  }
+
+  let order: Order | null = null;
+  try {
+    order = JSON.parse(sessionStorage.getItem('airpack-last-order') || 'null');
+  } catch {
+    order = null;
+  }
+
+  const view = document.querySelector<HTMLElement>('[data-order]')!;
+  if (!order) {
+    document.querySelector<HTMLElement>('[data-none]')!.hidden = false;
+  } else {
+    const set = (key: string, text: string) => view.querySelectorAll(`[data-o="${key}"]`).forEach((el) => (el.textContent = text));
+    const c = order.customer;
+    set('no', `#${order.orderNo}`);
+    set('date', order.date);
+    set('email', c.email);
+    set('total', formatTRY(order.total));
+    set('subtotal', formatTRY(order.subtotal));
+    set('shipping', order.shipping === 0 ? 'Ücretsiz' : formatTRY(order.shipping));
+    view.querySelector<HTMLAnchorElement>('[data-o="wa"]')!.href = order.waUrl;
+    view.querySelector('[data-o="rows"]')!.replaceChildren(
+      ...order.items.map((i) => {
+        const tr = document.createElement('tr');
+        const name = document.createElement('td');
+        const link = document.createElement('a');
+        link.href = `/urun/${i.slug}/`;
+        link.textContent = i.name;
+        name.append(link, ` × ${i.unit === 'metre' ? formatQuantity(i.quantity, 'metre') : formatNumber(i.quantity)}`);
+        const price = document.createElement('td');
+        price.className = 'r';
+        price.textContent = formatTRY(i.total);
+        tr.append(name, price);
+        return tr;
+      }),
+    );
+    view.querySelector<HTMLElement>('[data-o="billing"]')!.innerText = [
+      c.name,
+      c.company,
+      [c.taxOffice, c.taxNumber].filter(Boolean).join(' / '),
+      c.address,
+      `${c.district} / ${c.city}`,
+      c.phone,
+      c.email,
+    ]
+      .filter(Boolean)
+      .join('\n');
+    view.hidden = false;
+  }
+</script>
+
+<style>
+  .order {
+    padding: 2.5rem 0 5rem;
+    background: #fcfcfc;
+  }
+
+  .narrow {
+    max-width: 960px;
+  }
+
+  .none {
+    text-align: center;
+    padding: 4rem 1rem;
+  }
+
+  .none h1 {
+    font-size: 1.6rem;
+  }
+
+  .thanks {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    border-radius: 8px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1d4ed8;
+    margin-bottom: 2rem;
+  }
+
+  .thanks .icon {
+    font-size: 1.5rem;
+    color: var(--primary);
+  }
+
+  .thanks h1 {
+    font-size: 1.15rem;
+    margin: 0;
+    color: #1d4ed8;
+  }
+
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 1px;
+    background: #e5e5e5;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .meta li {
+    background: #fff;
+    padding: 1.2rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .meta strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 1.02rem;
+    color: var(--text-main);
+    overflow-wrap: anywhere;
+  }
+
+  .wa-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    padding: 1.75rem;
+    margin-bottom: 2rem;
+    border-radius: 12px;
+    border: 1.5px solid #86efac;
+    background: #f0fdf4;
+  }
+
+  .wa-card h2 {
+    font-size: 1.15rem;
+    color: #166534;
+    margin-bottom: 0.4rem;
+  }
+
+  .wa-card p {
+    margin: 0;
+    font-size: 0.92rem;
+    color: #15803d;
+  }
+
+  .wa-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 1rem 1.75rem;
+    border-radius: 999px;
+    background: #128c4b;
+    color: #fff;
+    font-weight: 800;
+    box-shadow: 0 4px 14px rgba(37, 211, 102, 0.4);
+  }
+
+  .wa-btn:hover {
+    background: #0f7a3f;
+  }
+
+  .wa-btn .icon {
+    font-size: 1.4rem;
+  }
+
+  .box {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    padding: 1.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .box h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1.25rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th,
+  td,
+  .box :global(td) {
+    text-align: left;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.95rem;
+  }
+
+  .box :global(td a) {
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  .r,
+  .box :global(.r) {
+    text-align: right;
+    font-weight: 700;
+  }
+
+  tfoot th {
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .sum th,
+  .sum td {
+    font-size: 1.1rem;
+    color: var(--primary);
+  }
+
+  address {
+    font-style: normal;
+    white-space: pre-line;
+    color: #334155;
+    line-height: 1.7;
+  }
+
+  .note {
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  .center {
+    text-align: center;
+  }
+</style>

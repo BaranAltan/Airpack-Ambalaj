@@ -1,0 +1,429 @@
+---
+import { categories, products as allProducts, type Product } from '../data/products';
+import Icon from './Icon.astro';
+import PageHero from './PageHero.astro';
+import ProductCard from './ProductCard.astro';
+
+interface Props {
+  badge: string;
+  title: string;
+  lead: string;
+  items: Product[];
+  /** Aktif kategori slug'ı; tüm ürünlerde undefined */
+  active?: string;
+  page: number;
+  totalPages: number;
+  /** Sayfa adresi üretici: 1 → /magaza/, 2 → /magaza/page/2/ */
+  pageUrl: (n: number) => string;
+  total: number;
+}
+
+const { badge, title, lead, items, active, page, totalPages, pageUrl, total } = Astro.props;
+const visibleCategories = categories.filter((c) => allProducts.some((p) => p.category.slug === c.slug) || c.slug === active);
+---
+
+<PageHero badge={badge} title={title} lead={lead} />
+
+<div class="container shop">
+  <aside class="sidebar">
+    <div class="search-box">
+      <form action="/magaza/" role="search" data-search-form>
+        <label for="shop-search" class="sr-only">Ürünlerde ara</label>
+        <input id="shop-search" type="search" class="input" placeholder="Ürünlerde ara" autocomplete="off" data-search />
+        <button type="submit" aria-label="Ara"><Icon name="search" /></button>
+      </form>
+      <ul class="search-results" data-results hidden></ul>
+    </div>
+
+    <h2 class="side-title"><Icon name="filter" /> Kategoriler</h2>
+    <ul class="cats">
+      <li><a href="/magaza/" aria-current={!active ? 'page' : undefined}>Hepsi</a></li>
+      {
+        visibleCategories.map((c) => (
+          <li>
+            <a href={`/kategori/${c.slug}/`} aria-current={active === c.slug ? 'page' : undefined}>
+              {c.name}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </aside>
+
+  <div class="main">
+    {
+      items.length === 0 ? (
+        <div class="empty">
+          <p>Bu kategoride henüz ürün bulunmuyor.</p>
+          <slot name="empty" />
+        </div>
+      ) : (
+        <>
+          <div class="grid">
+            {items.map((p, i) => (
+              <ProductCard
+                product={p}
+                priority={i === 0}
+                sizes="(min-width: 1400px) 315px, (min-width: 1101px) 22vw, (min-width: 769px) 30vw, (min-width: 601px) 45vw, 100vw"
+              />
+            ))}
+          </div>
+        </>
+      )
+    }
+
+    {
+      totalPages > 1 && (
+        <nav class="pagination" aria-label="Sayfalar">
+          {page > 1 ? (
+            <a href={pageUrl(page - 1)} rel="prev" aria-label="Önceki sayfa">
+              <Icon name="chevron-left" />
+            </a>
+          ) : (
+            <span class="disabled" aria-hidden="true">
+              <Icon name="chevron-left" />
+            </span>
+          )}
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) =>
+            n === page ? (
+              <span aria-current="page">{n}</span>
+            ) : (
+              <a href={pageUrl(n)} aria-label={`Sayfa ${n}`}>
+                {n}
+              </a>
+            ),
+          )}
+          {page < totalPages ? (
+            <a href={pageUrl(page + 1)} rel="next" aria-label="Sonraki sayfa">
+              <Icon name="chevron-right" />
+            </a>
+          ) : (
+            <span class="disabled" aria-hidden="true">
+              <Icon name="chevron-right" />
+            </span>
+          )}
+        </nav>
+      )
+    }
+
+    <slot name="about" />
+  </div>
+</div>
+
+<template id="tpl-search-row">
+  <li><a><img alt="" width="44" height="44" /><span class="r-name"></span><span class="r-price"></span></a></li>
+</template>
+
+<script>
+  import { cloneTemplate, loadCatalog } from '../scripts/cart';
+  import { formatTRY } from '../lib/pricing';
+
+  const input = document.querySelector<HTMLInputElement>('[data-search]')!;
+  const results = document.querySelector<HTMLElement>('[data-results]')!;
+  const norm = (s: string) => s.toLocaleLowerCase('tr-TR').replace(/[×x*]/g, 'x').replace(/\s+/g, '');
+
+  // Katalog yalnızca arama kutusu kullanılınca yüklenir.
+  let entries: { slug: string; n: string; p: number; t: string; u?: string; key: string }[] = [];
+  const ready = () =>
+    loadCatalog().then((c) => {
+      entries = Object.entries(c).map(([slug, v]) => ({ slug, ...v, key: norm(v.n) }));
+    });
+  input.addEventListener('focus', ready, { once: true });
+
+  const search = (q: string) => {
+    const k = norm(q);
+    return k ? entries.filter((e) => e.key.includes(k)) : [];
+  };
+
+  const render = () => {
+    const found = search(input.value);
+    results.replaceChildren();
+    if (!input.value.trim()) return (results.hidden = true);
+    results.hidden = false;
+    if (!found.length) {
+      const li = document.createElement('li');
+      li.className = 'none';
+      li.textContent = 'Sonuç bulunamadı.';
+      return results.append(li);
+    }
+    found.slice(0, 8).forEach((e) => {
+      const row = cloneTemplate('tpl-search-row')!;
+      const a = row.querySelector('a')!;
+      a.href = `/urun/${e.slug}/`;
+      row.querySelector('img')!.src = e.t;
+      row.querySelector('.r-name')!.textContent = e.n;
+      row.querySelector('.r-price')!.textContent = e.u === 'metre' ? `${formatTRY(e.p)}/m` : formatTRY(e.p);
+      results.append(row);
+    });
+  };
+
+  input.addEventListener('input', () => ready().then(render));
+  document.querySelector('[data-search-form]')!.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await ready();
+    const first = search(input.value)[0];
+    if (first) location.href = `/urun/${first.slug}/`;
+  });
+  document.addEventListener('click', (e) => {
+    if (!(e.target as Element).closest('.search-box')) results.hidden = true;
+  });
+</script>
+
+<style>
+  /* Canlı sitedeki gibi mağaza alanı diğer sayfalardan geniş */
+  .shop {
+    display: flex;
+    gap: 24px;
+    max-width: 1400px;
+    padding-top: 3rem;
+    padding-bottom: 6rem;
+  }
+
+  .sidebar {
+    width: 160px;
+    flex-shrink: 0;
+  }
+
+  .search-box {
+    position: relative;
+    margin-bottom: 2rem;
+  }
+
+  form {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  form .input {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+    background: #fff;
+  }
+
+  form button {
+    flex-shrink: 0;
+    width: 40px;
+    border-radius: 8px;
+    background-color: var(--primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  form button:hover {
+    background-color: var(--primary-hover);
+  }
+
+  .search-results {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    width: 320px;
+    z-index: 20;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    padding: 0.4rem;
+    max-height: 420px;
+    overflow-y: auto;
+  }
+
+  .search-results :global(a) {
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.4rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+  }
+
+  .search-results :global(a:hover) {
+    background: var(--bg-color);
+  }
+
+  .search-results :global(img) {
+    border-radius: 6px;
+    object-fit: cover;
+  }
+
+  .search-results :global(.r-name) {
+    font-weight: 600;
+  }
+
+  .search-results :global(.r-price) {
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  .search-results :global(.none) {
+    padding: 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+
+  .side-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .cats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .cats a {
+    display: block;
+    padding: 0.6rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: background-color var(--transition-fast);
+  }
+
+  .cats a:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+  }
+
+  .cats a[aria-current='page'] {
+    background-color: var(--primary-soft);
+    color: var(--primary-hover);
+    font-weight: 600;
+  }
+
+  .main {
+    flex-grow: 1;
+    min-width: 0;
+  }
+
+  .count {
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .count strong {
+    color: var(--text-main);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+  }
+
+  .grid :global(.price strong) {
+    font-size: 1.05rem;
+    font-weight: 800;
+  }
+
+  .empty {
+    padding: 4rem 2rem;
+    text-align: center;
+    background-color: var(--bg-card);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+  }
+
+  .empty p {
+    font-size: 1.15rem;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 3rem;
+  }
+
+  .pagination a,
+  .pagination span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 0.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+    font-size: 0.95rem;
+    transition: all var(--transition-fast);
+  }
+
+  .pagination a:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .pagination [aria-current='page'] {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .pagination .disabled {
+    color: #cbd5e1;
+    background: transparent;
+  }
+
+  @media (max-width: 1100px) {
+    .grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .shop {
+      flex-direction: column;
+      gap: 1.5rem;
+      padding-top: 2rem;
+    }
+
+    .sidebar {
+      width: 100%;
+    }
+
+    .side-title {
+      display: none;
+    }
+
+    .cats {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .cats a {
+      padding: 0.55rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+      background: #fff;
+    }
+
+    .search-box {
+      margin-bottom: 1rem;
+    }
+
+    .search-results {
+      width: 100%;
+    }
+
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+</style>

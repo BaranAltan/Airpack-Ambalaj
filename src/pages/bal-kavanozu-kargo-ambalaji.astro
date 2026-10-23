@@ -1,0 +1,35 @@
+---
+import ArticlePage from '../components/ArticlePage.astro';
+import { GUIDES } from '../data/guides';
+
+const guide = GUIDES.find((g) => g.path === '/bal-kavanozu-kargo-ambalaji/')!;
+---
+
+<ArticlePage guide={guide}>
+  <p class="answer"><strong>Kısa cevap:</strong> Bal kavanozlarını kargoda güvenle göndermek için kapağı sıkıca kapatıp sızdırmazlık için sabitleyin, her kavanozu ebadına uygun bir airpack poşete yerleştirip şişirin ve koli içinde dik, hareket etmeyecek şekilde yerleştirin.</p>
+
+  <h2>Bal ve pekmez gönderimindeki riskler</h2>
+  <ul>
+    <li><strong>Ağırlık:</strong> Bal ve pekmez yoğun içeriklerdir; dolu kavanoz ağır olduğu için darbede cama binen yük de büyüktür.</li>
+    <li><strong>Yapışkan sızıntı:</strong> Kapaktan sızan bal ya da pekmez koliyi ve diğer ürünleri kullanılamaz hale getirir; temizlenmesi de zordur.</li>
+    <li><strong>Sıcaklık:</strong> Bal sıcakta daha akışkan hale gelir; yaz aylarında kapak sızdırmazlığı daha da önemlidir.</li>
+  </ul>
+
+  <h2>Adım adım paketleme</h2>
+  <ol>
+    <li><strong>Kapağı kontrol edin:</strong> Kapağı sıkın, kapak çevresini streç filmle sarın; varsa emniyet bandını kapatın.</li>
+    <li><strong>Ebadı seçin:</strong> Kavanozun çapını ve kapak dahil boyunu ölçün; kavanozdan bir miktar büyük poşet seçin.</li>
+    <li><strong>Poşete yerleştirip şişirin:</strong> Kavanozu ortalayın, kanallar dolgun ama hafif esnek olana kadar şişirin.</li>
+    <li><strong>Dik yerleştirin:</strong> Kavanozları koliye dik yerleştirin, birbirine değmesinler.</li>
+    <li><strong>Boşlukları doldurun ve işaretleyin:</strong> Boşlukları hava kanallı ruloyla doldurun, koliyi “Kırılacak eşya” ve “Bu taraf yukarı” olarak işaretleyin.</li>
+  </ol>
+
+  <h2>Ağır kavanozlarda koli seçimi</h2>
+  <p>Birden fazla dolu kavanoz gönderirken koli toplam ağırlığı taşıyabilecek sağlamlıkta olmalıdır. Kolinin tabanını bantla güçlendirmek ve kavanozları tabana yakın, dik konumda yerleştirmek taşıma sırasında oluşan zorlanmayı azaltır. Kavanozlar arasındaki hava kanalları hem darbeyi emer hem de kavanozların birbirine çarpmasını önler.</p>
+
+  <h2>Petek bal ve özel ambalajlar</h2>
+  <p>Petek bal kutuları ve özel şekilli ambalajlar için ürünü kutusuyla birlikte uygun ebatta bir poşete yerleştirebilir ya da hava kanallı ruloyla sarabilirsiniz. Standart dışı bir ambalajınız varsa <a href="/ozel-uretim-logolu-airpack/">özel üretim</a> seçeneğini değerlendirebilirsiniz.</p>
+
+  <h2>Hangi ürünü seçmeliyim?</h2>
+  <p>Tek tip kavanozlar için <a href="/kategori/hazir-paketler/">hazır airpack poşetler</a>, farklı boylar ve koli boşlukları için <a href="/kategori/rulo-paketler/">hava kanallı rulolar</a> uygundur. Genel kavanoz paketleme önerileri <a href="/kavanoz-kargo-poseti/">kavanoz kargo poşeti</a> rehberinde.</p>
+</ArticlePage>

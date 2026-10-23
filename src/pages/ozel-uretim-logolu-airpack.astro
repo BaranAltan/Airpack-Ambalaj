@@ -1,0 +1,36 @@
+---
+import ArticlePage from '../components/ArticlePage.astro';
+import { GUIDES } from '../data/guides';
+
+const guide = GUIDES.find((g) => g.path === '/ozel-uretim-logolu-airpack/')!;
+---
+
+<ArticlePage guide={guide}>
+  <p class="answer"><strong>Kısa cevap:</strong> Hazır ebatlarımız ürününüze tam uymuyorsa ya da paketlerinizde markanızı öne çıkarmak istiyorsanız, ürününüze özel ölçüde veya kalıpta, logo baskılı hava kanallı ambalaj ürettirebilirsiniz. Teklif için ürününüzün ölçülerini, ağırlığını ve tahmini adedini WhatsApp üzerinden göndermeniz yeterlidir.</p>
+
+  <h2>Hangi durumlarda özel üretim gerekir?</h2>
+  <ul>
+    <li><strong>Standart dışı ürün şekilleri:</strong> Çok uzun, geniş ya da düzensiz formdaki ürünler hazır ebatlara tam oturmayabilir.</li>
+    <li><strong>Set ve çoklu ürünler:</strong> Birden fazla ürünü tek ambalajda göndermek istediğinizde ürünlere özel bölmeli bir kalıp gerekebilir.</li>
+    <li><strong>Marka görünürlüğü:</strong> Logonuzun ve kurumsal renklerinizin pakette yer alması, kutu açılışında markanızı öne çıkarır.</li>
+  </ul>
+
+  <h2>Teklif için gereken bilgiler</h2>
+  <ul>
+    <li>Ürün ölçüleri: en, boy ve kalınlık ya da çap</li>
+    <li>Ürünün ağırlığı ve bir fotoğrafı</li>
+    <li>Tahmini sipariş adedi ve sipariş sıklığı</li>
+    <li>Baskı isteniyorsa logo dosyası ve tercih edilen renkler</li>
+  </ul>
+
+  <h2>Süreç nasıl işler?</h2>
+  <ol>
+    <li>Ürün bilgilerinizi ve ihtiyacınızı WhatsApp üzerinden iletirsiniz.</li>
+    <li>Ürününüze uygun ölçü, kalıp ve baskı seçenekleri belirlenir; teklif hazırlanır.</li>
+    <li>Teklifte numune, üretim ve teslim süreleri belirtilir.</li>
+    <li>Onayınızla üretim planlanır ve hazırlanan ambalajlar size gönderilir.</li>
+  </ol>
+
+  <h2>Bilmeniz gerekenler</h2>
+  <p>Özel ölçü, kalıp ya da baskıyla hazırlanan ürünler kişiye özel üretildiği için bu ürünlerde cayma hakkı bulunmaz; ayrıntılar <a href="/iade-ve-cayma/">İade ve Cayma Hakkı</a> sayfasında. Özel üretime geçmeden önce <a href="/airpack-olcu-rehberi/">ölçü rehberindeki</a> hazır ebatlardan birinin ürününüze uyup uymadığını kontrol etmenizi öneririz; hazır ebatlar hemen sipariş verilebilir.</p>
+</ArticlePage>

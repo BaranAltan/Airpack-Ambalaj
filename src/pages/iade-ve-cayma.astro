@@ -1,0 +1,54 @@
+---
+import LegalPage from '../components/LegalPage.astro';
+import { LEGAL } from '../data/legal';
+import { SITE, whatsappLink } from '../data/site';
+
+const days = LEGAL.withdrawalDays;
+---
+
+<LegalPage
+  title="İade ve Cayma Hakkı"
+  description={`Airpack Ambalaj iade ve cayma koşulları: ${days} gün cayma hakkı, iade adımları, ücret iadesi, hasarlı veya hatalı ürünler ve özel üretim istisnası.`}
+  lead="İade, cayma hakkı ve hasarlı ürün süreçleri"
+>
+  <h2>Cayma hakkı</h2>
+  <p>
+    Ürünü teslim aldığınız tarihten itibaren <strong>{days} gün</strong> içinde, herhangi bir gerekçe göstermeden ve cezai
+    şart ödemeden cayma hakkınızı kullanabilirsiniz.
+  </p>
+
+  <h2>İade nasıl yapılır?</h2>
+  <ol>
+    <li>
+      {days} günlük süre dolmadan cayma talebinizi <a href={whatsappLink('Merhaba, siparişim için iade (cayma) talebinde bulunmak istiyorum.')} target="_blank" rel="noopener">WhatsApp</a> üzerinden ya da <a href={`mailto:${SITE.email}`}>{SITE.email}</a> adresine e-posta ile bildirin. Sipariş numaranızı
+      belirtin.
+    </li>
+    <li>Ürünü, bildiriminizden itibaren 10 gün içinde size iletilen anlaşmalı kargo firması ile gönderin. Bu durumda iade kargo bedeli tarafımıza aittir.</li>
+    <li>
+      Ürün bedeli ve ödediğiniz kargo ücreti, cayma bildiriminizin bize ulaşmasından itibaren 14 gün içinde bildireceğiniz
+      banka hesabına (IBAN) iade edilir.
+    </li>
+  </ol>
+  <p>Ürünün olağan kullanımı dışında meydana gelen değişiklik ve bozulmalardan alıcı sorumludur.</p>
+
+  <h2>Cayma hakkının kullanılamayacağı ürünler</h2>
+  <p>
+    Özel ölçü veya kalıpla üretilen, logo/baskı uygulanan ürünler gibi alıcının istekleri ya da kişisel ihtiyaçları
+    doğrultusunda hazırlanan ürünlerde cayma hakkı kullanılamaz.
+  </p>
+
+  <h2>Hasarlı, eksik veya hatalı ürün</h2>
+  <ul>
+    <li>Teslimat sırasında paketi kontrol edin. Hasarlı paketleri kargo görevlisine tutanak tutturarak teslim alın ya da teslim almayı reddedin.</li>
+    <li>Ürün hatalı, eksik ya da siparişten farklı geldiyse fotoğrafıyla birlikte bize bildirin; ürün ücretsiz olarak değiştirilir, eksik tamamlanır ya da bedeli iade edilir.</li>
+    <li>Ayıplı ürünlerde 6502 sayılı Kanun’un 11. maddesindeki seçimlik haklarınız (değişim, onarım, bedel indirimi, sözleşmeden dönme) saklıdır.</li>
+  </ul>
+
+  <h2>Ticari amaçlı alımlar</h2>
+  <p>
+    Ürünleri ticari veya mesleki amaçla satın alan işletmelerin (tacirlerin) iade ve değişim talepleri, sipariş koşullarına
+    göre ayrıca değerlendirilir. Bu durumda bizimle iletişime geçmeniz yeterlidir.
+  </p>
+
+  <p>Ayrıntılı koşullar için <a href="/mesafeli-satis-sozlesmesi/">Mesafeli Satış Sözleşmesi</a>’ni inceleyebilirsiniz.</p>
+</LegalPage>

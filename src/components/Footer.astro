@@ -1,0 +1,249 @@
+---
+import { Image } from 'astro:assets';
+import logoWhite from '../assets/site/logo-white.png';
+import { SITE } from '../data/site';
+import Icon from './Icon.astro';
+
+const year = new Date().getFullYear();
+const socials = [
+  { href: SITE.social.instagram, label: 'Instagram', icon: 'instagram' },
+  { href: SITE.social.linkedin, label: 'LinkedIn', icon: 'linkedin' },
+] as const;
+
+const quick = [
+  { href: '/', label: 'Ana Sayfa' },
+  { href: '/magaza/', label: 'Ürün Kataloğu' },
+  { href: '/hakkimizda/', label: 'Biz Kimiz?' },
+  { href: '/hava-kanalli-ambalaj/', label: 'Ambalaj Rehberi' },
+  { href: '/sikca-sorulan-sorular/', label: 'Sıkça Sorulan Sorular' },
+  { href: '/bize-ulasin/', label: 'Bize Ulaşın' },
+];
+
+const legal = [
+  { href: '/mesafeli-satis-sozlesmesi/', label: 'Mesafeli Satış Sözleşmesi' },
+  { href: '/iade-ve-cayma/', label: 'İade ve Cayma' },
+  { href: '/kargo-ve-teslimat/', label: 'Kargo ve Teslimat' },
+  { href: '/kvkk-aydinlatma-metni/', label: 'KVKK Aydınlatma Metni' },
+];
+
+const cats = [
+  { href: '/kategori/hazir-paketler/', label: 'Hazır Airpack Poşetler' },
+  { href: '/kategori/rulo-paketler/', label: 'Hava Kanallı Rulo' },
+  { href: '/airpack-olcu-rehberi/', label: 'Airpack Ölçü Rehberi' },
+  { href: '/ozel-uretim-logolu-airpack/', label: 'Özel Üretim Ambalaj' },
+];
+---
+
+<footer class="site-footer">
+  <div class="container cols">
+    <div>
+      <a href="/" aria-label="Airpack Ambalaj – Ana sayfa" class="logo">
+        <Image src={logoWhite} alt="Airpack Ambalaj" width={180} height={60} densities={[1, 2]} />
+      </a>
+      <p class="about">
+        Her türlü ürüne mükemmel uyumlu, %100 güvenli hava kanallı ambalaj sistemleriyle ürünlerinizi taşıyoruz.
+        Türkiye’nin lider ambalaj tedarikçisi.
+      </p>
+      <div class="socials">
+        {
+          socials.map((s) =>
+            s.href ? (
+              <a href={s.href} target="_blank" rel="noopener" aria-label={s.label}>
+                <Icon name={s.icon} />
+              </a>
+            ) : (
+              <span aria-hidden="true">
+                <Icon name={s.icon} />
+              </span>
+            ),
+          )
+        }
+      </div>
+    </div>
+
+    <nav aria-label="Hızlı menü">
+      <h2>Hızlı Menü</h2>
+      <ul>{quick.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
+    </nav>
+
+    <nav aria-label="Kategoriler">
+      <h2>Kategoriler</h2>
+      <ul>{cats.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
+    </nav>
+
+    <div>
+      <h2>İletişim</h2>
+      <ul class="contact">
+        <li><Icon name="phone" /><a href={SITE.phoneHref}>{SITE.phone}</a></li>
+        <li><Icon name="mail" /><a href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
+        <li><Icon name="map-pin" /><span>{SITE.address.city} / {SITE.address.district}</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="container bottom-inner">
+      <p>© {year} Airpack Ambalaj. Tüm hakları saklıdır.</p>
+      <nav class="legal-links" aria-label="Yasal bilgiler">
+        {legal.map((l) => <a href={l.href}>{l.label}</a>)}
+      </nav>
+      <div class="trust">
+        <span><i></i> 256-bit SSL Secure</span>
+        <span><i></i> Garantili Gönderim</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background-color: #0f172a;
+    color: #f1f5f9;
+    padding: 80px 0 0;
+    margin-top: auto;
+  }
+
+  .cols {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+    gap: 2rem;
+    padding-bottom: 60px;
+  }
+
+  .logo img {
+    width: 180px;
+    height: auto;
+  }
+
+  .about {
+    color: #94a3b8;
+    font-size: 14px;
+    line-height: 1.8;
+    margin: 1.25rem 0;
+    max-width: 330px;
+  }
+
+  h2 {
+    color: #fff;
+    font-size: 18px;
+    line-height: 1;
+    margin-bottom: 1.5rem;
+  }
+
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  a,
+  span {
+    color: #94a3b8;
+  }
+
+  a:hover {
+    color: var(--primary-light);
+  }
+
+  ul a {
+    display: inline-block;
+  }
+
+  .contact li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .contact .icon {
+    color: var(--primary-light);
+    font-size: 1.1rem;
+  }
+
+  .socials {
+    display: flex;
+    gap: 1rem;
+    font-size: 1.25rem;
+  }
+
+  .bottom {
+    border-top: 1px solid #1e293b;
+    padding: 24px 0;
+  }
+
+  .bottom-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 12px;
+  }
+
+  .bottom-inner p {
+    color: #94a3b8;
+    margin: 0;
+  }
+
+  .legal-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+  }
+
+  .legal-links a {
+    color: #94a3b8;
+  }
+
+  .legal-links a:hover {
+    color: #fff;
+  }
+
+  .trust {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .trust span {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #94a3b8;
+  }
+
+  .trust i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--success);
+  }
+
+  @media (pointer: coarse) {
+    .site-footer li a,
+    .legal-links a {
+      display: inline-block;
+      padding: 6px 0;
+    }
+  }
+
+  @media (max-width: 600px) {
+    /* Sabit WhatsApp düğmesi son satırı örtmesin */
+    .bottom {
+      padding-bottom: 84px;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .cols {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .cols {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

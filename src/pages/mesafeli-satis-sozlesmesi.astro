@@ -1,0 +1,124 @@
+---
+import LegalPage from '../components/LegalPage.astro';
+import SellerInfo from '../components/SellerInfo.astro';
+import { LEGAL, sellerName } from '../data/legal';
+import { SITE } from '../data/site';
+import { FREE_SHIPPING_MIN, MIN_QTY, SHIPPING_FEE, formatTRY } from '../lib/pricing';
+
+const days = LEGAL.withdrawalDays;
+---
+
+<LegalPage
+  title="Mesafeli Satış Sözleşmesi"
+  description="Airpack Ambalaj ön bilgilendirme formu ve mesafeli satış sözleşmesi: taraflar, ödeme, teslimat, cayma hakkı ve uyuşmazlıkların çözümü."
+  lead="Ön bilgilendirme formu ve mesafeli satış sözleşmesi"
+>
+  <h2>1. Ön Bilgilendirme Formu</h2>
+  <p>
+    Bu form, 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği uyarınca, siparişiniz
+    onaylanmadan önce sizi bilgilendirmek amacıyla hazırlanmıştır.
+  </p>
+  <h3>Satıcı bilgileri</h3>
+  <SellerInfo />
+  <h3>Ürün, fiyat ve ödeme</h3>
+  <ul>
+    <li>Ürünlerin temel nitelikleri (ölçü, malzeme, satış birimi) ilgili ürün sayfasında belirtilmiştir.</li>
+    <li>
+      Ürün fiyatları Türk Lirası olarak gösterilir. Hazır poşetler adet, rulolar metre fiyatıyla satılır; en az {MIN_QTY} adet veya {MIN_QTY} metre sipariş verilebilir.
+    </li>
+    <li>
+      Siparişe ait ürünler, miktarlar, birim fiyatlar, kargo ücreti ve ödenecek toplam tutar ödeme sayfasındaki sipariş
+      özetinde ve sipariş mesajında gösterilir.
+    </li>
+    <li>
+      Ödeme havale/EFT ile yapılır. Banka hesap (IBAN) bilgisi sipariş sonrası WhatsApp üzerinden iletilir. Sipariş,
+      ödemenin Satıcı hesabına ulaşmasıyla kesinleşir.
+    </li>
+  </ul>
+  <h3>Teslimat</h3>
+  <ul>
+    <li>
+      Kargo ücreti sipariş başına {formatTRY(SHIPPING_FEE)}’dir{
+        FREE_SHIPPING_MIN !== null && `; ${formatTRY(FREE_SHIPPING_MIN)} ve üzeri siparişlerde kargo ücretsizdir`
+      }.
+    </li>
+    <li>Ürünler, Alıcının sipariş formunda bildirdiği adrese anlaşmalı kargo firması ile gönderilir.</li>
+    <li>Teslimat, ödemenin onaylanmasından itibaren yasal süre olan 30 günü aşmamak kaydıyla gerçekleştirilir.</li>
+  </ul>
+  <h3>Cayma hakkı</h3>
+  <p>
+    Alıcı, ürünü teslim aldığı tarihten itibaren {days} gün içinde herhangi bir gerekçe göstermeksizin ve cezai şart
+    ödemeksizin cayma hakkına sahiptir. Ayrıntılar aşağıdaki sözleşmenin 5. ve 6. maddelerinde ve <a href="/iade-ve-cayma/">İade ve Cayma Hakkı</a> sayfasında yer almaktadır.
+  </p>
+  <h3>Şikâyet ve itirazlar</h3>
+  <p>
+    Şikâyetlerinizi yukarıdaki iletişim bilgileri üzerinden iletebilirsiniz. Uyuşmazlıklarda Ticaret Bakanlığınca her yıl
+    ilan edilen parasal sınırlar dahilinde Tüketici Hakem Heyetlerine, bu sınırları aşan durumlarda Tüketici Mahkemelerine
+    başvurulabilir.
+  </p>
+
+  <h2>2. Mesafeli Satış Sözleşmesi</h2>
+  <h3>Madde 1 – Taraflar</h3>
+  <p>
+    <strong>Satıcı:</strong> {sellerName} (bilgileri yukarıda yer almaktadır).<br />
+    <strong>Alıcı:</strong> {SITE.name} web sitesindeki ödeme sayfasında ad, soyad, firma, adres ve iletişim bilgilerini
+    bildirerek sipariş veren gerçek veya tüzel kişi.
+  </p>
+  <h3>Madde 2 – Konu</h3>
+  <p>
+    Bu sözleşmenin konusu, Alıcının Satıcıya ait {SITE.name} web sitesi üzerinden elektronik ortamda siparişini verdiği
+    ürünlerin satışı ve teslimine ilişkin olarak tarafların hak ve yükümlülüklerinin belirlenmesidir.
+  </p>
+  <h3>Madde 3 – Sözleşme konusu ürünler ve bedel</h3>
+  <p>
+    Ürünlerin cinsi, miktarı, birim fiyatı, kargo ücreti ve toplam bedeli, sipariş sırasında ödeme sayfasındaki sipariş
+    özetinde ve Alıcıya iletilen sipariş mesajında yer aldığı şekildedir. Bu bilgiler sözleşmenin ayrılmaz parçasıdır.
+  </p>
+  <h3>Madde 4 – Ödeme ve teslimat</h3>
+  <ol>
+    <li>Ödeme havale/EFT ile, Satıcının bildirdiği banka hesabına yapılır. Sipariş, ödemenin onaylanmasıyla kesinleşir.</li>
+    <li>Ürünler, Alıcının bildirdiği teslimat adresine kargo ile gönderilir. Kargo ücreti sipariş özetinde gösterilir.</li>
+    <li>Satıcı, ürünleri ödeme onayından itibaren en geç 30 gün içinde teslim etmekle yükümlüdür. Bu sürede teslim edilememesi halinde Alıcı sözleşmeyi feshedebilir.</li>
+    <li>
+      Alıcı, teslim sırasında paketi kontrol etmeli; hasarlı paketleri kargo görevlisine tutanak tutturarak teslim almalı
+      veya teslim almayı reddetmelidir.
+    </li>
+  </ol>
+  <h3>Madde 5 – Cayma hakkı</h3>
+  <ol>
+    <li>
+      Alıcı, ürünün kendisine veya gösterdiği kişiye teslim edildiği tarihten itibaren {days} gün içinde herhangi bir
+      gerekçe göstermeksizin cayma hakkını kullanabilir.
+    </li>
+    <li>Cayma bildirimi, süre dolmadan Satıcıya e-posta ({SITE.email}), WhatsApp ya da yazılı olarak iletilir.</li>
+    <li>
+      Alıcı, cayma bildiriminden itibaren 10 gün içinde ürünü Satıcıya geri gönderir. Satıcının anlaşmalı kargo firması ile
+      yapılan iadelerde kargo bedeli Satıcıya aittir.
+    </li>
+    <li>
+      Satıcı, cayma bildiriminin kendisine ulaşmasından itibaren 14 gün içinde, ürün bedeli ve teslimat masrafları dahil
+      tahsil edilen tüm ödemeleri Alıcının bildireceği banka hesabına iade eder.
+    </li>
+    <li>Ürünün olağan kullanımı dışında meydana gelen değişiklik ve bozulmalardan Alıcı sorumludur.</li>
+  </ol>
+  <h3>Madde 6 – Cayma hakkının kullanılamayacağı durumlar</h3>
+  <p>
+    Alıcının istekleri veya kişisel ihtiyaçları doğrultusunda hazırlanan ürünlerde (özel ölçü veya kalıpla üretilen,
+    logo/baskı uygulanan ürünler) Mesafeli Sözleşmeler Yönetmeliği’nin 15. maddesi uyarınca cayma hakkı kullanılamaz.
+  </p>
+  <h3>Madde 7 – Ticari amaçlı alımlar</h3>
+  <p>
+    Alıcının ürünleri ticari veya mesleki amaçla satın aldığı (tacir olduğu) durumlarda 6502 sayılı Kanun hükümleri
+    uygulanmaz; bu siparişlerde iade ve değişim koşulları taraflar arasında ayrıca belirlenir ve genel hükümler geçerlidir.
+  </p>
+  <h3>Madde 8 – Uyuşmazlıkların çözümü</h3>
+  <p>
+    Bu sözleşmeden doğan uyuşmazlıklarda, Ticaret Bakanlığınca ilan edilen parasal sınırlar dahilinde Alıcının veya
+    Satıcının yerleşim yerindeki Tüketici Hakem Heyetleri, bu sınırları aşan durumlarda Tüketici Mahkemeleri yetkilidir.
+  </p>
+  <h3>Madde 9 – Yürürlük</h3>
+  <p>
+    Alıcı, ödeme sayfasında bu sözleşmeyi ve ön bilgilendirme formunu okuyup kabul ettiğini onaylayarak siparişini
+    verdiğinde sözleşme kurulmuş sayılır.
+  </p>
+</LegalPage>

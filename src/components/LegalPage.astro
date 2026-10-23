@@ -1,0 +1,38 @@
+---
+// Yasal metin sayfaları: ortak metin şablonu + son güncelleme tarihi. Eksik firma bilgisi derlemede uyarı verir.
+import ProsePage from './ProsePage.astro';
+import { LEGAL, missingLegalFields } from '../data/legal';
+import { breadcrumbLd } from '../lib/seo';
+
+interface Props {
+  title: string;
+  description: string;
+  lead: string;
+}
+
+const { title, description, lead } = Astro.props;
+
+if (missingLegalFields.length && !(globalThis as { __legalWarned?: boolean }).__legalWarned) {
+  (globalThis as { __legalWarned?: boolean }).__legalWarned = true;
+  console.warn(`[yasal sayfalar] src/data/legal.ts içinde eksik bilgi: ${missingLegalFields.join(', ')}`);
+}
+---
+
+<ProsePage
+  title={title}
+  description={description}
+  badge="Yasal Bilgiler"
+  lead={lead}
+  jsonLd={[breadcrumbLd([{ name: 'Ana Sayfa', path: '/' }, { name: title, path: Astro.url.pathname }], Astro.site)]}
+>
+  <slot />
+  <p class="updated">Son güncelleme: {new Date(LEGAL.updated).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+</ProsePage>
+
+<style>
+  .updated {
+    margin-top: 2rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+</style>

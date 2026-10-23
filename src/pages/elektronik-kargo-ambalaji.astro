@@ -1,0 +1,35 @@
+---
+import ArticlePage from '../components/ArticlePage.astro';
+import { GUIDES } from '../data/guides';
+
+const guide = GUIDES.find((g) => g.path === '/elektronik-kargo-ambalaji/')!;
+---
+
+<ArticlePage guide={guide}>
+  <p class="answer"><strong>Kısa cevap:</strong> Elektronik ürünleri kargoda korumak için cihazı (mümkünse kendi kutusuyla) ebadına uygun bir airpack poşete yerleştirip şişirin ya da hava kanallı ruloyla sarın, ardından koli içinde hareket etmeyecek şekilde yerleştirin. Hava sütunları darbe ve sarsıntıyı cihaza iletmeden emer.</p>
+
+  <h2>Elektronik cihazlarda hasar nasıl oluşur?</h2>
+  <ul>
+    <li><strong>Ekran kırılması:</strong> Ekrana gelen noktasal baskı ya da köşe darbesi camı çatlatabilir.</li>
+    <li><strong>Köşe darbeleri:</strong> Kasa köşeleri darbeyi doğrudan iç bileşenlere iletir.</li>
+    <li><strong>Sarsıntı:</strong> Koli içinde hareket eden cihaz, taşıma boyunca sürekli küçük darbeler alır.</li>
+  </ul>
+
+  <h2>Adım adım paketleme</h2>
+  <ol>
+    <li>Cihazı kapatın; kablo ve aksesuarları ayrı bir poşete koyun.</li>
+    <li>Ekranlı cihazlarda ekranı koruyucu bir film ya da kılıfla örtün.</li>
+    <li>Cihazı (ya da kutusunu) uygun ebatta bir airpack poşete yerleştirip şişirin; büyük cihazları hava kanallı ruloyla sarın.</li>
+    <li>Koliye yerleştirin; cihazın koli duvarlarına değmemesine ve hareket etmemesine dikkat edin.</li>
+    <li>Kalan boşlukları ruloyla doldurun, koliyi “Kırılacak eşya” olarak işaretleyin.</li>
+  </ol>
+
+  <h2>Poşet mi, rulo mu?</h2>
+  <p>Telefon, tablet, kulaklık, akıllı saat gibi küçük ve orta boy cihazlar için <a href="/kategori/hazir-paketler/">hazır airpack poşetler</a> hızlı ve düzenli bir çözümdür. Dizüstü bilgisayar, monitör ya da farklı boyutlarda çok sayıda cihaz gönderiyorsanız <a href="/kategori/rulo-paketler/">hava kanallı rulo</a> ile cihazı sarmak daha esnek bir yöntemdir.</p>
+
+  <h2>Statik elektriğe duyarlı parçalar</h2>
+  <p>Anakart, ekran kartı ya da açıkta devre kartı bulunan parçaları göndermeden önce antistatik bir poşete yerleştirin; ardından hava kanallı ambalajla darbe koruması ekleyin.</p>
+
+  <h2>Doğru ebat</h2>
+  <p>Cihazın (ya da kutusunun) en, boy ve kalınlığını ölçün; şişirildiğinde iç hacim daralacağı için bir miktar büyük ebat seçin. Ebatları <a href="/airpack-olcu-rehberi/">ölçü rehberinde</a> karşılaştırabilir, emin olmadığınızda cihaz ölçüsünü WhatsApp’tan bize gönderebilirsiniz.</p>
+</ArticlePage>

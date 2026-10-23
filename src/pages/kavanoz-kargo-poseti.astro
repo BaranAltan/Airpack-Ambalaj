@@ -1,0 +1,38 @@
+---
+import ArticlePage from '../components/ArticlePage.astro';
+import { GUIDES } from '../data/guides';
+
+const guide = GUIDES.find((g) => g.path === '/kavanoz-kargo-poseti/')!;
+---
+
+<ArticlePage guide={guide}>
+  <p class="answer"><strong>Kısa cevap:</strong> Kavanoz kargo poşeti, cam kavanozun içine yerleştirilip şişirildiği hava kanallı (airpack) koruyucu poşettir. Şişirildiğinde kavanozun etrafını saran hava sütunları darbeleri emer ve kavanozların birbirine çarpmasını önler. Reçel, bal, sos, turşu ve kozmetik kavanozları için kullanılır.</p>
+
+  <h2>Kavanozlar neden özel koruma ister?</h2>
+  <ul>
+    <li><strong>Ağır içerik:</strong> Dolu bir cam kavanoz, aynı boydaki boş bir şişeden ağırdır; darbede cama binen yük artar.</li>
+    <li><strong>Geniş kapak:</strong> Kapak geniş olduğu için darbe ve sıcaklık değişiminde gevşeyip sızdırabilir.</li>
+    <li><strong>Cam dip ve kenarlar:</strong> Kavanozun dip ve omuz kısımları darbelere karşı hassastır.</li>
+  </ul>
+
+  <h2>Şişme kargo poşeti nasıl kullanılır?</h2>
+  <ol>
+    <li>Kapağı sıkın; sıvı ya da yapışkan içeriklerde kapak çevresini streç film veya bantla sabitleyin.</li>
+    <li>Kavanozun boyunu ve çapını ölçün, kavanozdan bir miktar büyük bir ebat seçin.</li>
+    <li>Kavanozu sönük poşete yerleştirin ve ortalayın.</li>
+    <li>Valf girişinden kanallar dolgun ama hafif esnek olana kadar şişirin.</li>
+    <li>Kavanozu koliye dik yerleştirin; boşlukları hava kanallı ruloyla doldurun.</li>
+  </ol>
+
+  <h2>Kapak ve sızdırmazlık</h2>
+  <p>Poşet kavanozu darbelere karşı korur, ancak kapaktan sızıntıyı tek başına önlemez. Gönderimden önce kapağı kontrol etmek, varsa emniyet bandını kapatmak ve kapak çevresini streç filmle sarmak sızıntı riskini azaltır. Kavanozları dik göndermek de kapağa gelen basıncı düşürür.</p>
+
+  <h2>Doğru ebat</h2>
+  <p>Ebat seçerken kavanozun en geniş yerindeki çapını ve kapak dahil toplam boyunu esas alın. Hava kanalları şişirildiğinde iç hacim daralacağı için kavanoza tam oturan değil, bir miktar büyük ebat seçin. Tüm ebatları <a href="/airpack-olcu-rehberi/">ölçü rehberinde</a> görebilirsiniz.</p>
+
+  <h2>Kavanoz setleri ve hediye kutuları</h2>
+  <p>Birden fazla kavanozu aynı kolide gönderirken her kavanozu ayrı bir poşete koyun. Hediye kutusu içinde gönderilen kavanozlarda kutuyu korumak istiyorsanız kutuyu uygun ebatta bir poşete yerleştirebilir ya da hava kanallı ruloyla sarabilirsiniz. Bal ve pekmez gibi ağır içerikler için ayrıntılar <a href="/bal-kavanozu-kargo-ambalaji/">bal kavanozu kargo ambalajı</a> rehberinde.</p>
+
+  <h2>Hangi ürünü seçmeliyim?</h2>
+  <p>Kavanozlarınız tek tip ise <a href="/kategori/hazir-paketler/">hazır airpack poşetler</a> en hızlı çözümdür; farklı boylarda kavanoz gönderiyorsanız <a href="/kategori/rulo-paketler/">hava kanallı rulo</a> esneklik sağlar.</p>
+</ArticlePage>

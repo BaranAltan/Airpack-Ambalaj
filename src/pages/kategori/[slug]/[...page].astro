@@ -1,0 +1,95 @@
+---
+import type { GetStaticPaths } from 'astro';
+import ShopAbout from '../../../components/ShopAbout.astro';
+import ShopView from '../../../components/ShopView.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { PAGE_SIZE, categories, categoryUrl, productUrl, products, sizeLabel, type Category } from '../../../data/products';
+import { whatsappLink } from '../../../data/site';
+import { categoryOgSlug, ogPath } from '../../../lib/og';
+import { absolute, breadcrumbLd } from '../../../lib/seo';
+
+// /kategori/hazir-paketler/, /kategori/hazir-paketler/page/2/ …
+export const getStaticPaths = (() =>
+  categories.flatMap((category) => {
+    const count = products.filter((p) => p.category.slug === category.slug).length;
+    const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE));
+    return Array.from({ length: totalPages }, (_, i) => ({
+      params: { slug: category.slug, page: i === 0 ? undefined : `page/${i + 1}` },
+      props: { category, page: i + 1, totalPages },
+    }));
+  })) satisfies GetStaticPaths;
+
+interface Props {
+  category: Category;
+  page: number;
+  totalPages: number;
+}
+
+const { category, page, totalPages } = Astro.props;
+const base = categoryUrl(category);
+const pageUrl = (n: number) => (n === 1 ? base : `${base}page/${n}/`);
+const inCategory = products.filter((p) => p.category.slug === category.slug);
+const items = inCategory.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+const isEmpty = inCategory.length === 0;
+const description =
+  page === 1 || !items.length
+    ? category.description
+    : `${category.title}, sayfa ${page}/${totalPages}: ${sizeLabel(items[0])} – ${sizeLabel(items.at(-1)!)} ebatları ve fiyatları. 50’li paketler, 1.000+ adette iskonto.`;
+
+const jsonLd = [
+  breadcrumbLd(
+    [
+      { name: 'Ana Sayfa', path: '/' },
+      { name: 'Mağaza', path: '/magaza/' },
+      { name: category.name, path: base },
+    ],
+    Astro.site,
+  ),
+  ...(items.length
+    ? [
+        {
+          '@type': 'ItemList',
+          itemListElement: items.map((p, i) => ({
+            '@type': 'ListItem',
+            position: (page - 1) * PAGE_SIZE + i + 1,
+            url: absolute(productUrl(p), Astro.site),
+            name: p.name,
+          })),
+        },
+      ]
+    : []),
+];
+---
+
+<BaseLayout
+  title={page === 1 ? category.seoTitle : `${category.title} - Sayfa ${page}`}
+  description={description}
+  jsonLd={jsonLd}
+  og={ogPath(categoryOgSlug(category.slug))}
+  imageAlt={category.title}
+  noindex={isEmpty}
+  prev={page > 1 ? pageUrl(page - 1) : undefined}
+  next={page < totalPages ? pageUrl(page + 1) : undefined}
+>
+  <ShopView
+    badge="Hava Kanallı Ambalaj Çözümleri"
+    title={category.title}
+    lead={category.description}
+    items={items}
+    active={category.slug}
+    page={page}
+    totalPages={isEmpty ? 1 : totalPages}
+    pageUrl={pageUrl}
+    total={inCategory.length}
+  >
+    {page === 1 && !isEmpty && <ShopAbout slot="about" kind={category.slug as 'hazir-paketler' | 'rulo-paketler'} />}
+    <div slot="empty">
+      <a
+        href={whatsappLink(`Merhaba, ${category.name.toLocaleLowerCase('tr-TR')} için fiyat almak istiyorum.`)}
+        class="btn btn-primary"
+        target="_blank"
+        rel="noopener">WhatsApp'tan Fiyat Alın</a
+      >
+    </div>
+  </ShopView>
+</BaseLayout>
