@@ -46,7 +46,12 @@ ile alınır (IBAN WhatsApp'tan iletilir). Sunucu veya veritabanı gerekmez.
 
 `main` dalına her push'ta `.github/workflows/deploy.yml` siteyi derler ve `dist/` içeriğini SFTP (port 22, SSH anahtarıyla)
 sunucudaki `public_html` klasörüne yükler. Sunucuda `dist/`'te olmayan dosyalar silinir; `.well-known`, `cgi-bin`,
-`error_log`, `php.ini` ve `google*.html` korunur. Elle çalıştırmak için GitHub > Actions > "Deploy site" > Run workflow.
+`error_log`, `php.ini`, `.user.ini` ve `google*.html` korunur. Elle çalıştırmak için GitHub > Actions > "Deploy site" > Run workflow.
+
+**Dikkat:** `public_html` içinde başka sitelerin klasörleri var (`acilberber.com.tr`, `insaatustan.com.tr`, `toptansedir.com.tr`,
+`toptanyoresel.com.tr`…). Adında nokta olan klasörlere yükleme hiç dokunmaz; yine de silinecek gibi görünürse iş durur.
+`public/.htaccess` bu sitelere de etki eder: `DirectoryIndex`'te `index.php` kalmalı, başlıklar `AIRPACK_SITE` ile sınırlı,
+en alttaki cPanel PHP blokları silinmemeli.
 
 İlk yükleme: `public_html`'de WordPress (`wp-config.php`) varken hiçbir şey silinmez; iş yalnızca silinecek ve yüklenecek
 dosyaları listeleyip durur. WordPress'in tam yedeği (dosyalar + veritabanı) alındıktan sonra Run workflow'da

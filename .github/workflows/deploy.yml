@@ -100,8 +100,10 @@ jobs:
             echo "cd $TARGET_DIR"
           }
           # Sayfalar ve diğer dosyalar; sitede artık olmayanlar silinir. Hariç: _astro (ayrı yüklenir), sunucunun kendi
-          # dosyaları (.well-known, cgi-bin, error_log, php.ini, .ftpquota) ve Search Console doğrulama dosyası (google*.html).
-          SITE_MIRROR='mirror -R --delete --parallel=4 -x ^_astro/ -x ^\.well-known/ -x ^cgi-bin/ -x ^error_log$ -x ^php\.ini$ -x ^\.ftpquota$ -x ^google[^/]*\.html$ dist .'
+          # dosyaları (.well-known, cgi-bin, error_log, php.ini, .user.ini, .ftpquota), Search Console doğrulama dosyası
+          # (google*.html) ve adında nokta olan klasörler: public_html'de başka sitelerin klasörleri var
+          # (acilberber.com.tr, insaatustan.com.tr, toptansedir.com.tr…); bunlara ASLA dokunulmaz.
+          SITE_MIRROR='mirror -R --delete --parallel=4 -x ^_astro/ -x ^\.well-known/ -x ^cgi-bin/ -x ^error_log$ -x ^php\.ini$ -x ^\.user\.ini$ -x ^\.ftpquota$ -x ^google[^/]*\.html$ -x ^[^/]+\.[^/]+/ dist .'
 
           { connect; echo "cls -1a"; } > list.lftp
           lftp -f list.lftp > remote-list.txt || {
@@ -124,6 +126,9 @@ jobs:
             echo "Onay verilirse yapılacak işlemler (deneme, gerçekte uygulanmadı):"
             { connect; echo "$SITE_MIRROR" | sed 's/^mirror /mirror --dry-run /'; } > dry.lftp
             lftp -f dry.lftp > dry-run.txt || true
+            # Silinecek en üst düzey dosya/klasörler Actions özetinde de görünsün (başka sitenin klasörü burada OLMAMALI).
+            top=$(grep -E '^(rm|rmdir)' dry-run.txt | awk '{print $NF}' | sed -E "s|^.*/$TARGET_DIR/||; s|/.*||" | sort -u | tr '\n' ' ')
+            echo "::notice title=Onay verilirse silinecekler::$top"
             echo "  Silinecek: $(grep -c '^rm' dry-run.txt || true) girdi, yüklenecek: $(grep -c '^put' dry-run.txt || true) dosya. İlk 400 satır:"
             sed 's/^/  /' dry-run.txt | head -n 400 || true
             echo ""
@@ -136,6 +141,16 @@ jobs:
           if ! grep -qx 'wp-config.php' remote-list.txt && ! grep -qxE '_astro/?' remote-list.txt \
              && grep -qvxE '\.{1,2}/?|\.well-known/?|cgi-bin/?|error_log|php\.ini|\.htaccess|\.ftpquota|google[^/]*\.html' remote-list.txt; then
             echo "::error::Hedef klasörde ($TARGET_DIR) ne WordPress ne de bu site var; yanlış klasör olabilir. Yükleme durduruldu."
+            exit 1
+          fi
+
+          # Güvenlik 4: gerçek yüklemeden önce deneme yap; başka bir sitenin klasöründen (adında nokta olan) tek dosya
+          # bile silinecek görünüyorsa hiçbir şey yapmadan dur.
+          { connect; echo "$SITE_MIRROR" | sed 's/^mirror /mirror --dry-run /'; } > check.lftp
+          lftp -f check.lftp > check.txt
+          bad=$(grep -E '^(rm|rmdir)' check.txt | awk '{print $NF}' | sed -E "s|^.*/$TARGET_DIR/||" | grep -E '^[^/]+\.[^/]+/' | head -n 5 | tr '\n' ' ' || true)
+          if [ -n "$bad" ]; then
+            echo "::error::Başka bir sitenin klasöründen dosya silinecek görünüyor; yükleme durduruldu: $bad"
             exit 1
           fi
 
