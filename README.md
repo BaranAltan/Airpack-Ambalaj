@@ -53,11 +53,11 @@ GitHub > Settings > Secrets and variables > Actions altında tanımlı olması g
 | Secret            | Değer                                                     |
 | ----------------- | --------------------------------------------------------- |
 | `SSH_HOST`        | cPanel sunucu adresi                                      |
-| `SSH_PORT`        | `22`                                                      |
+| `SSH_PORT`        | `22` (boşsa 22)                                           |
 | `SSH_USER`        | cPanel kullanıcı adı                                      |
 | `SSH_PRIVATE_KEY` | Yayın anahtarının özel kısmı (cPanel'de yetkilendirilmiş) |
-| `SSH_KNOWN_HOSTS` | `ssh-keyscan -p 22 <sunucu>` çıktısı                      |
-| `DEPLOY_PATH`     | `public_html` (ev dizinine göre)                          |
+| `SSH_KNOWN_HOSTS` | `ssh-keyscan -p 22 <sunucu>` çıktısı (boşsa her yüklemede alınır) |
+| `DEPLOY_PATH`     | `public_html` (ev dizinine göre; boşsa `public_html`)     |
 
 `public/.htaccess` (LiteSpeed/Apache) şunları yapar: HTTP → HTTPS ve www → www'siz yönlendirme, eski WordPress adresleri
 için 410, `/404.html` hata sayfası, sıkıştırma, güvenlik başlıkları ve `/_astro/` altındaki hash'li dosyalar için 1 yıllık

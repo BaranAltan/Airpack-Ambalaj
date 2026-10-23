@@ -34,15 +34,33 @@ jobs:
       - name: Siteyi derle
         run: npm run build
 
+      # SSH_PORT boşsa 22, DEPLOY_PATH boşsa public_html kullanılır.
+      # SSH_KNOWN_HOSTS boşsa sunucunun anahtarı ssh-keyscan ile alınır.
       - name: SSH anahtarını hazırla
         env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USER: ${{ secrets.SSH_USER }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
         run: |
+          missing=""
+          [ -n "$SSH_HOST" ] || missing="$missing SSH_HOST"
+          [ -n "$SSH_USER" ] || missing="$missing SSH_USER"
+          [ -n "$SSH_PRIVATE_KEY" ] || missing="$missing SSH_PRIVATE_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::GitHub secrets eksik:$missing (Settings > Secrets and variables > Actions)"
+            exit 1
+          fi
           install -m 700 -d ~/.ssh
-          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          if [ -n "$SSH_KNOWN_HOSTS" ]; then
+            printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -p "${SSH_PORT:-22}" "$SSH_HOST" > ~/.ssh/known_hosts
+            ssh-keygen -lf ~/.ssh/known_hosts
+          fi
 
       # --delete-delay: sunucuda dist'te olmayan dosyalar yükleme bittikten sonra silinir.
       # Korunanlar (silinmez): SSL doğrulama klasörü, cgi-bin, Google doğrulama dosyası.
@@ -57,5 +75,5 @@ jobs:
             --exclude='.well-known/' \
             --exclude='cgi-bin/' \
             --exclude='google*.html' \
-            -e "ssh -i ~/.ssh/deploy_key -p $SSH_PORT -o BatchMode=yes" \
-            dist/ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
+            -e "ssh -i $HOME/.ssh/deploy_key -p ${SSH_PORT:-22} -o BatchMode=yes" \
+            dist/ "$SSH_USER@$SSH_HOST:${DEPLOY_PATH:-public_html}/"
