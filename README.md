@@ -44,20 +44,21 @@ ile alınır (IBAN WhatsApp'tan iletilir). Sunucu veya veritabanı gerekmez.
 
 ## Yayına alma (GitHub Actions)
 
-`main` dalına her push'ta `.github/workflows/deploy.yml` siteyi derler ve `dist/` içeriğini SSH üzerinden rsync ile
-sunucudaki `public_html` klasörüne yükler. Sunucuda `dist/`'te olmayan dosyalar silinir; `.well-known`, `cgi-bin` ve
-`google*.html` korunur. Elle çalıştırmak için GitHub > Actions > "Yayına al" > Run workflow.
+`main` dalına her push'ta `.github/workflows/deploy.yml` siteyi derler ve `dist/` içeriğini SFTP (port 22, SSH anahtarıyla)
+sunucudaki `public_html` klasörüne yükler. Sunucuda `dist/`'te olmayan dosyalar silinir; `.well-known`, `cgi-bin`,
+`error_log`, `php.ini` ve `google*.html` korunur. Elle çalıştırmak için GitHub > Actions > "Deploy site" > Run workflow.
 
-GitHub > Settings > Secrets and variables > Actions altında tanımlı olması gerekenler:
+İlk yükleme: `public_html`'de WordPress (`wp-config.php`) varken hiçbir şey silinmez; iş yalnızca silinecek ve yüklenecek
+dosyaları listeleyip durur. WordPress'in tam yedeği (dosyalar + veritabanı) alındıktan sonra Run workflow'da
+`replace_wordpress` kutusu işaretlenerek bir kez çalıştırılır. Veritabanı silinmez; gerekirse cPanel'den elle kaldırılır.
 
-| Secret            | Değer                                                     |
-| ----------------- | --------------------------------------------------------- |
-| `SSH_HOST`        | cPanel sunucu adresi                                      |
-| `SSH_PORT`        | `22` (boşsa 22)                                           |
-| `SSH_USER`        | cPanel kullanıcı adı                                      |
-| `SSH_PRIVATE_KEY` | Yayın anahtarının özel kısmı (cPanel'de yetkilendirilmiş) |
-| `SSH_KNOWN_HOSTS` | `ssh-keyscan -p 22 <sunucu>` çıktısı (boşsa her yüklemede alınır) |
-| `DEPLOY_PATH`     | `public_html` (ev dizinine göre; boşsa `public_html`)     |
+GitHub > Settings > Secrets and variables > Actions altında tanımlı olması gerekenler (Male Kale ve Toptan Yöresel ile aynı adlar):
+
+| Secret            | Değer                                                                  |
+| ----------------- | ---------------------------------------------------------------------- |
+| `FTP_SERVER`      | `ftp.airpackambalaj.com.tr`                                            |
+| `FTP_USERNAME`    | cPanel kullanıcı adı                                                   |
+| `SSH_PRIVATE_KEY` | `airpack_yayin` anahtarının gizli kısmı (cPanel > SSH Access'te yetkilendirilmiş) |
 
 `public/.htaccess` (LiteSpeed/Apache) şunları yapar: HTTP → HTTPS ve www → www'siz yönlendirme, eski WordPress adresleri
 için 410, `/404.html` hata sayfası, sıkıştırma, güvenlik başlıkları ve `/_astro/` altındaki hash'li dosyalar için 1 yıllık

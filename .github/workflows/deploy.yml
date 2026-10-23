@@ -1,79 +1,152 @@
-# main dalına her push'ta siteyi derler ve SSH (rsync) ile cPanel sunucusuna yükler.
-# Gerekli GitHub secrets: SSH_HOST, SSH_PORT, SSH_USER, SSH_PRIVATE_KEY, SSH_KNOWN_HOSTS, DEPLOY_PATH
-name: Yayına al
+# GitHub'a her gönderimde (main dalı) siteyi derler ve cPanel'e SFTP (port 22) ile yükler.
+# Gerekli gizli bilgiler (GitHub › Settings › Secrets and variables › Actions):
+#   FTP_SERVER      sunucu adresi (ftp.airpackambalaj.com.tr — Male Kale ve Toptan Yöresel ile aynı cPanel hesabı)
+#   FTP_USERNAME    cPanel kullanıcı adı
+#   SSH_PRIVATE_KEY cPanel › SSH Access'te yetkilendirilen SSH anahtarının GİZLİ (private) kısmı (bu siteye özel anahtar: airpack_yayin)
+# (Bağlantı şifreyle değil anahtarla kurulur; FTP_PASSWORD kullanılmaz.)
+#
+# İlk geçiş: hedef klasörde WordPress varken hiçbir şey yüklenmez ve silinmez; yalnızca yapılacaklar listelenir.
+# WordPress'in tam yedeği alındıktan sonra Actions › Deploy site › Run workflow ile
+# "replace_wordpress" kutusu işaretlenerek bir kez çalıştırılır.
+name: Deploy site
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      replace_wordpress:
+        description: "WordPress yedeğini aldım: klasördeki WordPress dosyalarını silip yeni siteyi yükle"
+        type: boolean
+        default: false
 
-# Aynı anda tek yükleme çalışsın; yeni push gelirse sıraya girer.
 concurrency:
   group: deploy
-  cancel-in-progress: false
+  cancel-in-progress: false   # yarım kalmış yükleme olmasın; sıradaki bekler
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
+    env:
+      # Sitenin cPanel'deki klasörü (hesabın ana klasörüne göre). Male Kale ve Toptan Yöresel kendi klasörlerindedir.
+      TARGET_DIR: public_html
+      PORT: '22'
+      REPLACE_WORDPRESS: ${{ inputs.replace_wordpress == true }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
 
-      # Paylaşım (OG) görsellerindeki yazılar için Inter yazı tipi
-      - name: Yazı tipini kur
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-inter
+      # fonts-inter: paylaşım (OG) görsellerindeki yazılar için; lftp: SFTP yüklemesi için
+      - name: Araçları kur
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-inter lftp > /dev/null
 
-      - name: Bağımlılıkları kur
-        run: npm ci
+      - run: npm ci
 
-      - name: Siteyi derle
-        run: npm run build
+      # İşlenmiş görselleri saklar; görseller değişmedikçe derleme dakikalar yerine saniyeler sürer.
+      - uses: actions/cache@v4
+        with:
+          path: node_modules/.astro
+          key: astro-images-${{ github.sha }}
+          restore-keys: astro-images-
 
-      # SSH_PORT boşsa 22, DEPLOY_PATH boşsa public_html kullanılır.
-      # SSH_KNOWN_HOSTS boşsa sunucunun anahtarı ssh-keyscan ile alınır.
-      - name: SSH anahtarını hazırla
+      - run: npm run build
+
+      - name: Prepare SFTP connection
         env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          SERVER: ${{ secrets.FTP_SERVER }}
+          USERNAME: ${{ secrets.FTP_USERNAME }}
+          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
+          # Kopyala-yapıştırla gelen boşlukları ve "sftp://", "/", ":22" gibi ekleri temizle.
+          SERVER=$(printf '%s' "$SERVER" | tr -d '[:space:]')
+          SERVER=${SERVER#*://}; SERVER=${SERVER%%/*}; SERVER=${SERVER%:*}
+          USERNAME=$(printf '%s' "$USERNAME" | tr -d '[:space:]')
           missing=""
-          [ -n "$SSH_HOST" ] || missing="$missing SSH_HOST"
-          [ -n "$SSH_USER" ] || missing="$missing SSH_USER"
-          [ -n "$SSH_PRIVATE_KEY" ] || missing="$missing SSH_PRIVATE_KEY"
-          if [ -n "$missing" ]; then
-            echo "::error::GitHub secrets eksik:$missing (Settings > Secrets and variables > Actions)"
+          [ -n "$SERVER" ] || missing="$missing FTP_SERVER"
+          [ -n "$USERNAME" ] || missing="$missing FTP_USERNAME"
+          [ -n "$PRIVATE_KEY" ] || missing="$missing SSH_PRIVATE_KEY"
+          [ -z "$missing" ] || { echo "Eksik gizli bilgi:$missing (GitHub › Settings › Secrets and variables › Actions)"; exit 1; }
+          case "$PRIVATE_KEY" in
+            *"PRIVATE KEY-----"*) ;;
+            *) echo "SSH_PRIVATE_KEY bir SSH anahtarı gibi görünmüyor; -----BEGIN ... PRIVATE KEY----- satırıyla başlamalı."; exit 1 ;;
+          esac
+          case "$TARGET_DIR" in
+            "" | "." | "/" | *..*) echo "TARGET_DIR klasörü geçersiz: '$TARGET_DIR'"; exit 1 ;;
+          esac
+          echo "::add-mask::$SERVER"
+          echo "::add-mask::$USERNAME"
+          { echo "SERVER=$SERVER"; echo "USERNAME=$USERNAME"; } >> "$GITHUB_ENV"
+          getent hosts "$SERVER" > /dev/null || { echo "FTP_SERVER adresi bulunamadı; değeri kontrol edin (ftp.airpackambalaj.com.tr olmalı)."; exit 1; }
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$PRIVATE_KEY" | tr -d '\r' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | sed -n '/^-----BEGIN/,/^-----END/p' > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -T 15 -p "$PORT" "$SERVER" >> ~/.ssh/known_hosts 2> /dev/null || true
+          test -s ~/.ssh/known_hosts || { echo "Sunucu adresi doğru ama port $PORT yanıt vermedi (hosting yurt dışı bağlantıları engelliyor olabilir)."; exit 1; }
+
+      # SERVER ve USERNAME, önceki adımda temizlenmiş hâlleriyle gelir.
+      - name: Upload to cPanel via SFTP
+        run: |
+          connect() {
+            echo "set cmd:fail-exit yes"
+            echo "set net:max-retries 3"
+            echo "set net:timeout 30"
+            echo "set sftp:connect-program 'ssh -a -x -o BatchMode=yes -i $HOME/.ssh/deploy_key'"
+            echo "open -u $USERNAME, sftp://$SERVER:$PORT"
+            echo "cd $TARGET_DIR"
+          }
+          # Sayfalar ve diğer dosyalar; sitede artık olmayanlar silinir. Hariç: _astro (ayrı yüklenir), sunucunun kendi
+          # dosyaları (.well-known, cgi-bin, error_log, php.ini, .ftpquota) ve Search Console doğrulama dosyası (google*.html).
+          SITE_MIRROR='mirror -R --delete --parallel=4 -x ^_astro/ -x ^\.well-known/ -x ^cgi-bin/ -x ^error_log$ -x ^php\.ini$ -x ^\.ftpquota$ -x ^google[^/]*\.html$ dist .'
+
+          { connect; echo "cls -1a"; } > list.lftp
+          lftp -f list.lftp > remote-list.txt || {
+            echo "Bağlanılamadı ya da hedef klasöre ($TARGET_DIR) girilemedi. Anahtar (airpack_yayin) cPanel › SSH Access'te Authorize edildi mi?"
+            exit 1
+          }
+          echo "Hedef klasör ($TARGET_DIR) şu an $(grep -cv '^\.\{1,2\}/\?$' remote-list.txt || true) girdi içeriyor."
+
+          # Güvenlik 1: hedefte hesabın ana klasörüne özgü klasörler görünüyorsa yanlış yerdeyiz; hiçbir şey yazmadan dur.
+          if grep -qxE '(public_html|mail|etc|tmp|logs|\.cpanel)/?' remote-list.txt; then
+            echo "Hedef klasör ($TARGET_DIR) hesabın ana klasörü gibi görünüyor; yükleme durduruldu."
             exit 1
           fi
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          if [ -n "$SSH_KNOWN_HOSTS" ]; then
-            printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
-          else
-            ssh-keyscan -p "${SSH_PORT:-22}" "$SSH_HOST" > ~/.ssh/known_hosts
-            ssh-keygen -lf ~/.ssh/known_hosts
+
+          # Güvenlik 2: WordPress hâlâ duruyorsa açık onay olmadan hiçbir şey silme; yapılacakları listele ve dur.
+          if grep -qx 'wp-config.php' remote-list.txt && [ "$REPLACE_WORDPRESS" != "true" ]; then
+            echo "Hedef klasörde WordPress var (wp-config.php). Hiçbir şey yüklenmedi ve silinmedi."
+            echo "Klasördeki girdiler:"
+            sed 's/^/  /' remote-list.txt
+            echo "Onay verilirse yapılacak işlemler (deneme, gerçekte uygulanmadı):"
+            { connect; echo "$SITE_MIRROR" | sed 's/^mirror /mirror --dry-run /'; } > dry.lftp
+            lftp -f dry.lftp > dry-run.txt || true
+            echo "  Silinecek: $(grep -c '^rm' dry-run.txt || true) girdi, yüklenecek: $(grep -c '^put' dry-run.txt || true) dosya. İlk 400 satır:"
+            sed 's/^/  /' dry-run.txt | head -n 400 || true
+            echo ""
+            echo "WordPress dosyalarının ve veritabanının tam yedeğini aldıktan sonra:"
+            echo "GitHub › Actions › Deploy site › Run workflow › 'replace_wordpress' kutusunu işaretleyip çalıştırın."
+            exit 1
           fi
 
-      # --delete-delay: sunucuda dist'te olmayan dosyalar yükleme bittikten sonra silinir.
-      # Korunanlar (silinmez): SSL doğrulama klasörü, cgi-bin, Google doğrulama dosyası.
-      - name: Sunucuya yükle
-        env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-        run: |
-          rsync -rlptvz --delete-delay --chmod=D755,F644 \
-            --exclude='.well-known/' \
-            --exclude='cgi-bin/' \
-            --exclude='google*.html' \
-            -e "ssh -i $HOME/.ssh/deploy_key -p ${SSH_PORT:-22} -o BatchMode=yes" \
-            dist/ "$SSH_USER@$SSH_HOST:${DEPLOY_PATH:-public_html}/"
+          # Güvenlik 3: ne WordPress ne bu site varsa (ve klasör boş değilse) klasör yanlış olabilir; dur.
+          if ! grep -qx 'wp-config.php' remote-list.txt && ! grep -qxE '_astro/?' remote-list.txt \
+             && grep -qvxE '\.{1,2}/?|\.well-known/?|cgi-bin/?|error_log|php\.ini|\.htaccess|\.ftpquota|google[^/]*\.html' remote-list.txt; then
+            echo "Hedef klasörde ($TARGET_DIR) ne WordPress ne de bu site var; yanlış klasör olabilir. Yükleme durduruldu."
+            exit 1
+          fi
+
+          # 1) Yeni CSS/JS/görseller: adları içeriğe göre değiştiği için yalnızca eksikler yüklenir.
+          # 2) Sayfalar ve diğer dosyalar yüklenir; sitede artık olmayanlar silinir.
+          # 3) Artık kullanılmayan eski CSS/JS/görseller en son silinir (eski sayfayı açık tutan ziyaretçi bozulmasın).
+          {
+            connect
+            echo "mirror -R --only-missing --parallel=4 dist/_astro _astro"
+            echo "$SITE_MIRROR"
+            echo "mirror -R --delete --only-missing dist/_astro _astro"
+          } > upload.lftp
+          lftp -f upload.lftp
+          echo "Yükleme tamamlandı: $TARGET_DIR"
