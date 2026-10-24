@@ -41,9 +41,9 @@ jobs:
           node-version: 24
           cache: npm
 
-      # fonts-inter: paylaşım (OG) görsellerindeki yazılar için; lftp: SFTP yüklemesi için
+      # fonts-inter: paylaşım (OG) görsellerindeki yazılar için; lftp: SFTP yüklemesi için; dnsutils (dig): DNS yedeği için
       - name: Araçları kur
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-inter lftp > /dev/null
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-inter lftp dnsutils > /dev/null
 
       - run: npm ci
 
@@ -81,11 +81,31 @@ jobs:
           echo "::add-mask::$SERVER"
           echo "::add-mask::$USERNAME"
           { echo "SERVER=$SERVER"; echo "USERNAME=$USERNAME"; } >> "$GITHUB_ENV"
-          getent hosts "$SERVER" > /dev/null || { echo "::error::FTP_SERVER adresi bulunamadı; değeri kontrol edin (ftp.airpackambalaj.com.tr olmalı)."; exit 1; }
+          # GitHub sunucusunun DNS'i bazen geçici olarak yanıt vermiyor: birkaç kez dene, olmazsa genel DNS'e
+          # (1.1.1.1, 8.8.8.8) sor ve bulunan adresi /etc/hosts'a yaz.
+          resolved=""
+          for i in 1 2 3; do
+            getent hosts "$SERVER" > /dev/null && { resolved=yes; break; }
+            sleep 5
+          done
+          if [ -z "$resolved" ]; then
+            ip=""
+            for dns in 1.1.1.1 8.8.8.8; do
+              ip=$(dig +short +time=5 +tries=2 A "$SERVER" @"$dns" | grep -E '^[0-9.]+$' | tail -n 1 || true)
+              [ -n "$ip" ] && break
+            done
+            [ -n "$ip" ] || { echo "::error::Sunucu adresi (FTP_SERVER) DNS'te bulunamadı. Genelde geçicidir; birkaç dakika sonra Run workflow ile tekrar deneyin. Sürerse FTP_SERVER değerini kontrol edin."; exit 1; }
+            echo "$ip $SERVER" | sudo tee -a /etc/hosts > /dev/null
+            echo "::warning::GitHub'ın DNS'i sunucu adını çözemedi; adres genel DNS'ten alındı."
+          fi
           install -d -m 700 ~/.ssh
           printf '%s\n' "$PRIVATE_KEY" | tr -d '\r' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | sed -n '/^-----BEGIN/,/^-----END/p' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -T 15 -p "$PORT" "$SERVER" >> ~/.ssh/known_hosts 2> /dev/null || true
+          for i in 1 2 3; do
+            ssh-keyscan -T 15 -p "$PORT" "$SERVER" >> ~/.ssh/known_hosts 2> /dev/null || true
+            test -s ~/.ssh/known_hosts && break
+            sleep 5
+          done
           test -s ~/.ssh/known_hosts || { echo "::error::Sunucu adresi doğru ama port $PORT yanıt vermedi (hosting yurt dışı bağlantıları engelliyor olabilir)."; exit 1; }
 
       # SERVER ve USERNAME, önceki adımda temizlenmiş hâlleriyle gelir.
