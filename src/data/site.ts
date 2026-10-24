@@ -27,7 +27,7 @@ export const SITE = {
   paymentNote:
     'Siparişinizi onayladıktan sonra size verilecek olan IBAN numarasına ödemeyi gerçekleştirmeniz gerekmektedir. Ödeme onayından sonra siparişiniz kargoya verilir.',
 
-  gtmId: 'GTM-538NLBKB',
+  gtmId: 'GTM-WD2X4WR4',
 } as const;
 
 export const NAV = [
