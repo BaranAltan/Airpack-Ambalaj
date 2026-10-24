@@ -26,6 +26,8 @@ export const SITE = {
   /** Havale/EFT bilgisi sipariş sonrası WhatsApp üzerinden iletilir. */
   paymentNote:
     'Siparişinizi onayladıktan sonra size verilecek olan IBAN numarasına ödemeyi gerçekleştirmeniz gerekmektedir. Ödeme onayından sonra siparişiniz kargoya verilir.',
+
+  gtmId: 'GTM-538NLBKB',
 } as const;
 
 export const NAV = [
