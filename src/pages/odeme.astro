@@ -185,6 +185,9 @@ import { SITE } from '../data/site';
     }
 
     submitted = true;
+    const w = window as Window & { dataLayer?: unknown[] };
+    w.dataLayer = w.dataLayer || [];
+    w.dataLayer.push({ event: 'custom_form_sent', site_name: location.hostname.replace(/^www\./, '') });
     window.open(waUrl, '_blank', 'noopener');
     cart.clear();
     location.href = '/siparis-ozeti/';

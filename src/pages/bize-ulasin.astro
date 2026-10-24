@@ -88,6 +88,9 @@ import { breadcrumbLd } from '../lib/seo';
       '',
       val('c-message'),
     ].join('\n');
+    const w = window as Window & { dataLayer?: unknown[] };
+    w.dataLayer = w.dataLayer || [];
+    w.dataLayer.push({ event: 'custom_form_sent', site_name: location.hostname.replace(/^www\./, '') });
     window.open(whatsappLink(message), '_blank', 'noopener');
   });
 </script>
